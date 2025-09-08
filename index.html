@@ -1,29 +1,58 @@
 <!DOCTYPE html>
-<html lang="en-US">
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width"  />
+    <!--inital-scale=1.0, maximum-scale=1.0, user-scalable=no是指定
+    页面初始缩放比例为1.0，最大缩放比例为1.0，用户无法缩放页面-->
     <title>My test page</title>
     <link href="styles/style.css" rel="stylesheet" />
   </head>
   <body>
     <h1>Hello World!</h1>
+
+    <button>点我改名字！</button>
+    
+    <header>你好我是页眉，我第一次学习HTML，请多指教</header>
+    <nav>导航栏</nav>
+    <section class="class1">这是一个section</section>
+    <section class="class2">
+      这是另一个class的section
+    <div>这是一个div
+      <img src="images/mti5.png" alt="My test image" />
+    </div>
+    </section>
+    <article>这是一个article</article>
+    <figure>这是一个figure</figure>
+    <figcaption>这是一个figcaption</figcaption>
+    <div>这是一个div</div>
+    <footer>页脚</footer>
+    <!--
+      <header>包含网站的Logo等页首相关的资讯
+      <nav>用来放置网站的导览列或主选单
+      <main>网站的主要内容
+      <footer>包含版权声明等页尾相关的资讯
+      如果<main>中有多个主要内容区块，可以使用<section>来区分
+    -->
     <h2>这是副标题</h2>
-    <h3>这是三级标题</h3>
+    <h3>请尝试点击点击</h3>
     <h4>这是四级标题</h4>
     <h5>无限的标题</h5>
     <h6>标题的尽头</h6>
     <p>谢谢你的提醒，自动填充</p>
-    <img src="images/my-test-image.png" alt="My test image" />
+    <!--区块元素有： div, p, h1-h6, ul, ol, li, table, header, footer, section, article, nav, figure, figcaption 等
+    行内元素有： span, a, img, strong, em, b, i, u, br, input, label, select, textarea 等
+    -->
+    <img id="switchable-img" src="images/my-test-image.png" alt="My test image" />
     <p>This is my <strong>first</strong> website.</p>
     <ul>
       <li>这是一个无序列表</li>
       <li>这是一个无序列表！</li>
-      <li>这是一个无序列表！！</li>
-      <li>这是一个无序列表！！！</li>
+      <li><em>这是一个斜体无序列表！！</em></li>
+      <li><strong>这是一个粗体无序列表！！！</strong></li>
     </ul>
     <ol>
-      <li>这是一个有序列表</li>
+      <li>这是一个<br>断行有序列表</li>
       <li>这是一个有序列表！</li>
       <li>这是一个有序列表！！</li>
       <li>这是一个有序列表！！！</li>
@@ -38,10 +67,10 @@
     <a herf="https://www.mozilla.org/zh-CN/about/manifesto/">
       This is a link to Mozilla宣言，好棒的宣言!
     </a>
-    发现了，写错了，应该是href不是herf。
+    <br>发现了，写错了，应该是href不是herf。<br>
     原来不需要封装也可以写字吗？VSCode的自动补全AI对我在想什么的预判有点吓人了
     <p>
-      链接不会自己换行欸，<a
+      链接不会自己换行欸，因为这是一个行内元素<a
         href="https://www.mozilla.org/zh-CN/about/manifesto/"
       >
         Mozilla Manifesto </a
@@ -53,7 +82,7 @@
 
     <img src="images/box-model.png" alt="Box model" />
 
-    如果你翻到这里，谢谢你，html真好玩儿
+    <h2>如果你翻到这里，谢谢你，html真好玩儿</h2>
 
     <script src="scripts/main.js"></script>
   </body>
