@@ -155,7 +155,7 @@ p:hover {
 }
 
 /* *:hover中的*表示所有元素 */
-/* 响应式设计 */
+/* 响应式设计 
 @media (max-width: 700px) {
   body {
     width: 100%;
@@ -212,7 +212,6 @@ p:hover {
 
   .class2 {
     flex-direction: column;
-    /*flex属性用于创建灵活的布局，flex-deirection属性用于设置主轴方向，row表示水平排列，column表示垂直排列*/
   }
 
   .class2 div {
@@ -221,4 +220,4 @@ p:hover {
     margin: 10px 0;
     border-width: 10px;
   }
-}
+}*/
