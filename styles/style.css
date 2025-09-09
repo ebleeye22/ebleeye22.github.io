@@ -112,7 +112,7 @@ img {
 
 .class1 {
   height: 120px;
-  width: 100vw;
+  width: 135%;
   margin: 0 0 0 -20vw;
   background-image: url(../images/mti4.png);
   background-size: cover;
