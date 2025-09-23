@@ -171,4 +171,12 @@ p:hover {
     border: 60px dotted purple;
     margin: 0 -20px 0 -20px;
   }
+  img {
+    width: 100%;
+    display: block;
+    place-items: center;
+    margin: 0 auto;
+    box-shadow: 30px 30px 3px blue;
+    border: 60px dotted;
+  }
 }
