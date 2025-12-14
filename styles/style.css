@@ -162,7 +162,7 @@ p:hover {
 @media (max-width: 700px) {
   body {
     width: 100%;
-    max-width: 600px;
+    max-width: 400px;
     margin: 0 auto;
     background-color: black;
     border: 5px solid yellow;
@@ -180,3 +180,4 @@ p:hover {
     border: 60px dotted;
   }
 }
+
