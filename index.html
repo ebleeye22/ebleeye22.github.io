@@ -1,89 +1,41 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+<!doctype html>
+<html lang="en-US">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width"  />
-    <!--inital-scale=1.0, maximum-scale=1.0, user-scalable=no是指定
-    页面初始缩放比例为1.0，最大缩放比例为1.0，用户无法缩放页面-->
+    <meta name="viewport" content="width=device-width" />
     <title>My test page</title>
-    <link href="styles/style.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <!--从Google Fonts引入Material Symbols-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0&icon_names=play_arrow,pause,skip_next" />
   </head>
   <body>
-    <h1>Hello World!</h1>
+    <h1>Hi! Here are some sounds I recorded.</h1>
 
-    <button>点我改名字！</button>
-    
-    <header>你好我是页眉，我第一次学习HTML，请多指教</header>
-    <nav>导航栏</nav>
-    <section class="class1">这是一个section</section>
-    <section class="class2">
-      这是另一个class的section
-    <div>这是一个div
-      <img src="images/mti5.png" alt="My test image" />
-    </div>
-    </section>
-    <article>这是一个article</article>
-    <figure>这是一个figure</figure>
-    <figcaption>这是一个figcaption</figcaption>
-    <div>这是一个div</div>
-    <footer>页脚</footer>
-    <!--
-      <header>包含网站的Logo等页首相关的资讯
-      <nav>用来放置网站的导览列或主选单
-      <main>网站的主要内容
-      <footer>包含版权声明等页尾相关的资讯
-      如果<main>中有多个主要内容区块，可以使用<section>来区分
-    -->
-    <h2>这是副标题</h2>
-    <h3>请尝试点击点击</h3>
-    <h4>这是四级标题</h4>
-    <h5>无限的标题</h5>
-    <h6>标题的尽头</h6>
-    <p>谢谢你的提醒，自动填充</p>
-    <!--区块元素有： div, p, h1-h6, ul, ol, li, table, header, footer, section, article, nav, figure, figcaption 等
-    行内元素有： span, a, img, strong, em, b, i, u, br, input, label, select, textarea 等
-    -->
-    <img id="switchable-img" src="images/my-test-image.png" alt="My test image" />
-    <p>This is my <strong>first</strong> website.</p>
-    <ul>
-      <li>这是一个无序列表</li>
-      <li>这是一个无序列表！</li>
-      <li><em>这是一个斜体无序列表！！</em></li>
-      <li><strong>这是一个粗体无序列表！！！</strong></li>
-    </ul>
-    <ol>
-      <li>这是一个<br>断行有序列表</li>
-      <li>这是一个有序列表！</li>
-      <li>这是一个有序列表！！</li>
-      <li>这是一个有序列表！！！</li>
-    </ol>
-
-    <a
-      href="https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Getting_started/Your_first_website/Creating_the_content"
-      >This is a link to 学习Web开发</a
-    >
-    <p>发生了我不明白的事情，这里的Mozilla Mnifesto点不进去是因为什么？</p>
-
-    <a herf="https://www.mozilla.org/zh-CN/about/manifesto/">
-      This is a link to Mozilla宣言，好棒的宣言!
-    </a>
-    <br>发现了，写错了，应该是href不是herf。<br>
-    原来不需要封装也可以写字吗？VSCode的自动补全AI对我在想什么的预判有点吓人了
     <p>
-      链接不会自己换行欸，因为这是一个行内元素<a
-        href="https://www.mozilla.org/zh-CN/about/manifesto/"
-      >
-        Mozilla Manifesto </a
-      >是不是为了这样
+    
+    <button id="playButton" onclick="playPauseSound()">
+      <span class="material-symbols-outlined">play_arrow</span>
+    </button>
+
+    <!--
+    <img src="covers/2024-05-20 183949.png" alt="Cover Image" />
+    -->
+    
+    <audio id="myAudio" src="sounds/005.mp3"></audio>
     </p>
-    <p>那<ol><li>这</li><li>样</li></ol>呢？Prettier表示不愿意hh</p>
 
-    <!--This is 注释-->
+    <!--
+    <button onclick="playSound()">PLAY</button>
+    <button onclick="pauseSound()">PAUSE</button>
+    -->
+    <button onclick="nextSound()">
+      <span class="material-symbols-outlined">skip_next</span>
+    </button>
 
-    <img src="images/box-model.png" alt="Box model" />
+    <p>Monday, May 20, 2024</span></p>
+    <p>Dali City, Yunnan Province</p>
 
-    <h2>如果你翻到这里，谢谢你，html真好玩儿</h2>
+    <script src="script.js"></script>
 
-    <script src="scripts/main.js"></script>
   </body>
 </html>

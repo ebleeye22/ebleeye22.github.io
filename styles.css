@@ -1,0 +1,24 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 100px;
+  border: 1px solid red ;
+  background-color: black;
+}
+
+h1 {
+  color: white;
+}
+
+p {
+  color: white;
+  font-size: 18px;
+}
+
+img {
+  width: 50%;
+}
+
+.play-button {
+  width: 50%;
+}
