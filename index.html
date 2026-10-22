@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My test page</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- 页面共用的 SVG 特效定义；通过 id 在下方的图形中引用。 -->
+    <svg
+      class="svg-defs"
+      aria-hidden="true"
+      style="position: absolute; width: 0; height: 0; overflow: hidden;"
+    >
+      <defs>
+        <!-- 为播放图标添加内阴影，营造凹陷的视觉效果。 -->
+        <filter id="fx-inner-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feOffset dx="10.5" dy="18" />
+          <feGaussianBlur stdDeviation="20" result="offset-blur" />
+          <feComposite operator="out" in="SourceGraphic" in2="offset-blur" result="inverse" />
+          <feFlood flood-color="#000000" flood-opacity="0.6" result="color" />
+          <feComposite operator="in" in="color" in2="inverse" result="shadow" />
+          <feComposite operator="in" in="shadow" in2="SourceGraphic" />
+        </filter>
+      </defs>
+    </svg>
+
+    <!-- 顶部装饰区域。 -->
+    <header>
+      <div class="header-circle" aria-hidden="true"></div>
+    </header>
+
+    <!-- 双栏主内容：左侧主轨道，右侧辅助轨道。 -->
+    <main>
+      <section aria-label="左侧区域">
+        <div class="column-content">
+          <!-- 轨道容器开始 -->
+          <div class="figure-container">
+            <!-- 轨道入口的图形容器 -->
+            <div class="stage-control">
+              <figure class="control-figure-volume">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 -960 960 960"
+                  aria-hidden="true"
+                  fill="#FFFFFF"
+                >
+                  <path d="M560-131v-82q90-26 145-100t55-168q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 127-78 224.5T560-131ZM120-360v-240h160l200-200v640L280-360H120Zm440 40v-322q47 22 73.5 66t26.5 96q0 51-26.5 94.5T560-320Z" filter="url(#fx-inner-shadow)" />
+                </svg>
+              </figure>
+              <figure class="control-figure-next">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 -960 960 960"
+                  aria-hidden="true"
+                  fill="#FFFFFF"
+                >
+                  <path d="M660-240v-480h80v480h-80Zm-440 0v-480l360 240-360 240Z" filter="url(#fx-inner-shadow)" />
+                </svg>
+              </figure>
+            </div>
+            <!-- 添加轨道入口。 -->
+            <span class="add-track-hint">Add another Track</span>
+            <button class="add-track-button" aria-label="添加轨道"></button>
+          </div>
+          <!-- 轨道容器结束 -->
+
+          <!-- 主轨道封面、播放入口和媒体信息。 -->
+          <div class="square">
+            <div class="scene-image">
+              <svg
+                class="control-figure"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 -960 960 960"
+                aria-hidden="true"
+                fill="#FFFFFF"
+              >
+                <path d="M320-200v-560l440 280-440 280Z" filter="url(#fx-inner-shadow)" />
+              </svg>
+            </div>
+            <div class="scene-caption">
+              <span>[Time]</span>
+              <span>[Location]</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 关于链接及主轨道播放控制。 -->
+        <footer class="left-footer">
+          <span class="footer-link about-link">About</span>
+          <div class="controls" aria-label="播放控制">
+            <button class="control-button" type="button" aria-label="音量">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+                <path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" />
+              </svg>
+            </button>
+            <button class="control-button play-button" type="button" aria-label="播放">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m8 5 12 7-12 7V5Z" />
+              </svg>
+            </button>
+            <button class="control-button" type="button" aria-label="下一首">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m5 5 10 7-10 7V5ZM19 5v14" />
+              </svg>
+            </button>
+          </div>
+          <span class="footer-link contact-link">Contact</span>
+        </footer>
+      </section>
+
+      <!-- 辅助轨道：展示封面和独立的声道/播放控制。 -->
+      <section aria-label="右侧区域" class="track-card__secondary">
+        <div class="column-content">
+          <div class="square">
+            <div class="scene-image" aria-hidden="true">
+              <svg
+                class="control-figure"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 -960 960 960"
+                aria-hidden="true"
+                fill="#FFFFFF"
+              >
+                <path d="M320-200v-560l440 280-440 280Z" filter="url(#fx-inner-shadow)" />
+              </svg>
+            </div>
+            <div class="scene-caption">
+              <span>[Time]</span>
+              <span>[Location]</span>
+            </div>
+          </div>
+        </div>
+        <footer class="right-footer">
+          <div class="controls right-controls" aria-label="音频控制">
+            <button class="control-button pan-button" type="button" aria-label="PAN 声道控制">
+              PAN
+            </button>
+            <button class="control-button play-button" type="button" aria-label="播放">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m8 5 12 7-12 7V5Z" />
+              </svg>
+            </button>
+            <button class="control-button" type="button" aria-label="下一首">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m5 5 10 7-10 7V5ZM19 5v14" />
+              </svg>
+            </button>
+          </div>
+        </footer>
+      </section>
+    </main>
+
+    <!-- 页面交互逻辑。 -->
+    <script src="script.js"></script>
+  </body>
+</html>

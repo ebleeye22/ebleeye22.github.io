@@ -1,0 +1,61 @@
+/* 1. 定义旋转动画 */
+@keyframes spin {
+  from {
+    rotate: 0deg;
+  }
+  to {
+    rotate: 360deg;
+  }
+}
+
+/* 1. 定义入场动画关键帧 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px); /* 初始位置偏下 30px */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0); /* 回到原位 */
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    /* 初始状态：在容器右侧外部，且透明 */
+    translate: 100% 0; /* 移动到自身宽度的200%右侧 */
+    opacity: 0;
+  }
+  to {
+    /* 最终状态：回到原位，完全显示 */
+    translate: 0 0;
+    opacity: 1;
+  }
+}
+
+@keyframes mixFadeIn {
+  from {
+    --alpha: 0%; /* 完全透明 */
+  }
+  to {
+    --alpha: 50%; /* 完全不透明 */
+  }
+}
