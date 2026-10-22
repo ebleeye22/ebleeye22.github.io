@@ -51,22 +51,14 @@ body {
     Roboto,
     "Helvetica Neue",
     Arial,
-    /* macOS / iOS */
-    "PingFang TC",
+    /* macOS / iOS */ "PingFang TC",
     "Heiti TC",
-    /* Windows */
-    "Microsoft JhengHei",
+    /* Windows */ "Microsoft JhengHei",
     "微軟正黑體",
-    /* Linux / Android / 开源字体降级 */
-    "Noto Sans TC",
+    /* Linux / Android / 开源字体降级 */ "Noto Sans TC",
     "Source Han Sans TC",
-    /* 通用无衬线 */
-    sans-serif;
-  background: linear-gradient(
-    to bottom,
-    black,
-    var(--darker-scene-color)
-  );
+    /* 通用无衬线 */ sans-serif;
+  background: linear-gradient(to bottom, black, var(--darker-scene-color));
 }
 
 header {
@@ -123,7 +115,8 @@ section:first-child {
 .stage-control {
   display: flex;
   position: absolute;
-  z-index: 0;
+  /* Keep the page background available to the child icon's screen blend. */
+  z-index: auto;
   inset: 0;
   align-items: center;
   justify-content: space-around;
@@ -137,9 +130,48 @@ section:first-child {
   transition: opacity 2s ease;
 }
 
-.stage-control svg {
+.stage-control svg{
   width: var(--square-size);
   height: var(--square-size);
+}
+
+.stage-control .shadow-icon-volume,
+.stage-control .shadow-icon-next {
+  position: absolute;
+}
+
+.stage-control .shadow-icon-volume {
+  /* The visible path starts 120 units into the 960-unit viewBox. */
+  left: max(calc(2 * var(--header-inset) - var(--square-size) * 120 / 960), calc((100% - 3 * var(--square-size)) / 3));
+}
+
+.stage-control .shadow-icon-next,
+.stage-control .control-figure-next {
+  /* The visible path ends at 740, leaving 220 units of SVG whitespace. */
+  right: max(calc(2 * var(--header-inset) - var(--square-size) * 220 / 960), calc((100% - 3 * var(--square-size)) / 3));
+}
+
+.stage-control .control-figure-next {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  fill: black;
+  mix-blend-mode: screen;
+  transition:
+    opacity 2s ease,
+    fill 0.25s ease;
+}
+
+.control-figure-next path {
+  pointer-events: visibleFill;
+}
+
+.control-figure-next:has(path:hover) {
+  fill: color-mix(in srgb, var(--scene-color) 50%, rgba(255, 255, 255, 0.5));
+}
+
+main:has(.track-card__secondary.active) .control-figure-next path {
+  pointer-events: none;
 }
 
 main:has(.track-card__secondary.active) .stage-control figure {
@@ -147,14 +179,9 @@ main:has(.track-card__secondary.active) .stage-control figure {
 }
 
 .track-card__secondary {
-  background: linear-gradient(
-    to top,
-    black,
-    var(--darker-scene-color)
-  );
+  background: linear-gradient(to top, black, var(--darker-scene-color));
   margin-right: -50%;
   transition: margin-right 3s cubic-bezier(0.4, 0, 0.2, 1);
-  pointer-events: none;
 }
 
 .track-card__secondary.active {
@@ -182,15 +209,76 @@ main:has(.track-card__secondary.active) .stage-control figure {
   background: linear-gradient(to top, var(--scene-color), gray);
 }
 
-.control-figure {
-  z-index: 100;
-  padding-bottom: 0;
+/* 三个图标共用淡入动画。音量和下一首只动画内部 SVG，
+   让外层 figure 仍能独立控制第二栏展开时的隐藏效果。 */
+.shadow-icon-play,
+.shadow-icon-volume svg,
+.shadow-icon-next svg {
   --i: 2;
+  /* both 让延迟期间保持透明，并在动画结束后保持可见。
+     2 × 0.5s = 延迟 1 秒，然后用 2 秒完成淡入。 */
   animation: fadeIn 2s ease-in-out both;
   animation-delay: calc(var(--i) * 0.5s);
+}
+
+.shadow-icon-play {
+  z-index: 100;
+  padding-bottom: 0;
   transition: transform 0.05s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
   mix-blend-mode: multiply;
+}
+
+.control-figure-play {
+  /* SVG 的矩形空白区域不接收鼠标事件，下面单独启用三角形 path。 */
+  pointer-events: none;
+  z-index: 100;
+  position: fixed;
+  width: var(--square-size);
+  height: var(--square-size);
+  fill: black;
+  mix-blend-mode: screen;
+  transition: fill 0.25s ease;
+}
+
+.control-figure-play-secondary {
+  /* 第二栏移动完成前隐藏控件；内部 path 也暂不接收鼠标事件。 */
+  visibility: hidden;
+  /* SVG 空白区域不接收鼠标事件，内部 path 单独响应。 */
+  pointer-events: none;
+  z-index: 100;
+  position: fixed;
+  width: var(--square-size);
+  height: var(--square-size);
+  fill: black;
+  mix-blend-mode: screen;
+  transition: fill 0.25s ease;
+}
+
+.control-figure-play path {
+  /* visibleFill 只在可见路径的填充区域内响应鼠标。 */
+  pointer-events: visibleFill;
+}
+
+/* :has(path:hover) 表示：只有内部 path 被悬停时，才改变 SVG 的填充色。
+   颜色继续在 SVG 上设置，以保留原来的 fill 过渡动画。 */
+.control-figure-play:has(path:hover) {
+  fill: color-mix(in srgb, var(--scene-color) 50%, rgba(255, 255, 255, 0.5));
+}
+
+/* JS 在第二栏展开完成后添加这个类，显示控件并启用三角形。 */
+.track-card__secondary.controls-ready .control-figure-play-secondary {
+  visibility: visible;
+}
+
+.track-card__secondary.controls-ready .control-figure-play-secondary path {
+  /* 只在三角形填充区域内响应鼠标。 */
+  pointer-events: visibleFill;
+}
+
+.track-card__secondary.controls-ready
+  .control-figure-play-secondary:has(path:hover) {
+  fill: color-mix(in srgb, var(--scene-color) 50%, rgba(255, 255, 255, 0.5));
 }
 
 .scene-caption {
