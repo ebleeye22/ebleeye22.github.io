@@ -14,6 +14,9 @@
       style="position: absolute; width: 0; height: 0; overflow: hidden"
     >
       <defs>
+      <clipPath id="volume-hit-shape" clipPathUnits="objectBoundingBox">
+        <path transform="matrix(0.001041666667 0 0 0.001041666667 0 1)" d="M560-131v-82q90-26 145-100t55-168q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 127-78 224.5T560-131ZM120-360v-240h160l200-200v640L280-360H120Zm440 40v-322q47 22 73.5 66t26.5 96q0 51-26.5 94.5T560-320Z" />
+      </clipPath>
         <!-- 为播放图标添加内阴影，营造凹陷的视觉效果。 -->
         <filter
           id="fx-inner-shadow"
@@ -63,6 +66,10 @@
                   />
                 </svg>
               </figure>
+              <figure class="control-figure-volume">
+                <!-- SVG Mask 音量条 -->
+                <div class="volume-svg-mask" id="volumeSvgMask"></div>
+              </figure>
               <figure class="shadow-icon-next">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -77,8 +84,13 @@
                 </svg>
               </figure>
               <figure class="control-figure-next" aria-hidden="true">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
-                  <path d="M660-240v-480h80v480h-80Zm-440 0v-480l360 240-360 240Z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 -960 960 960"
+                >
+                  <path
+                    d="M660-240v-480h80v480h-80Zm-440 0v-480l360 240-360 240Z"
+                  />
                 </svg>
               </figure>
             </div>
@@ -121,15 +133,47 @@
         </div>
 
         <!-- 关于链接及主轨道播放控制。 -->
+        <div
+          class="bottom-popup"
+          id="about-popup"
+          role="status"
+          aria-hidden="true"
+        >
+          Hello World!
+        </div>
+        <div class="volume-panel">
+          <input
+            id="volume"
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value="0.5"
+            aria-label="音量"
+          />
+        </div>
         <footer class="left-footer">
-          <span class="footer-link about-link">About</span>
+          <button
+            class="footer-link about-link"
+            type="button"
+            aria-controls="about-popup"
+            aria-expanded="false"
+          >
+            About
+          </button>
           <div class="controls" aria-label="播放控制">
-            <button class="control-button" type="button" aria-label="音量">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M11 5 6 9H3v6h3l5 4V5Z" />
-                <path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" />
-              </svg>
-            </button>
+            <div class="volume-control">
+              <button
+                class="control-button volume-button"
+                type="button"
+                aria-label="音量"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+                  <path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" />
+                </svg>
+              </button>
+            </div>
             <button
               class="control-button play-button"
               type="button"
@@ -145,7 +189,14 @@
               </svg>
             </button>
           </div>
-          <span class="footer-link contact-link">Contact</span>
+          <button
+            class="footer-link contact-link"
+            type="button"
+            aria-controls="about-popup"
+            aria-expanded="false"
+          >
+            Contact
+          </button>
         </footer>
       </section>
 

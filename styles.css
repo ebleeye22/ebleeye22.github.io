@@ -97,6 +97,8 @@ section {
 }
 
 section:first-child {
+  --footer-height: 65px;
+  --footer-text-height: 24px;
   position: relative;
   flex: 1;
   overflow: hidden;
@@ -130,7 +132,7 @@ section:first-child {
   transition: opacity 2s ease;
 }
 
-.stage-control svg{
+.stage-control svg {
   width: var(--square-size);
   height: var(--square-size);
 }
@@ -140,15 +142,55 @@ section:first-child {
   position: absolute;
 }
 
-.stage-control .shadow-icon-volume {
+.stage-control .shadow-icon-volume,
+.stage-control .control-figure-volume {
   /* The visible path starts 120 units into the 960-unit viewBox. */
-  left: max(calc(2 * var(--header-inset) - var(--square-size) * 120 / 960), calc((100% - 3 * var(--square-size)) / 3));
+  left: max(
+    calc(2 * var(--header-inset) - var(--square-size) * 120 / 960),
+    calc((100% - 3 * var(--square-size)) / 3)
+  );
+}
+
+.control-figure-volume {
+  position: absolute;
+}
+
+.volume-svg-mask {
+  width: min(40vh, 40vw);
+  height: min(40vh, 40vw);
+  cursor: grabbing;
+  clip-path: url(#volume-hit-shape);
+  touch-action: none; /* 防止移动端拖拽触发页面滚动 */
+
+  /* 1. 使用 SVG 矢量路径作为 Mask */
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 -960 960 960'><path d='M560-131v-82q90-26 145-100t55-168q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 127-78 224.5T560-131ZM120-360v-240h160l200-200v640L280-360H120Zm440 40v-322q47 22 73.5 66t26.5 96q0 51-26.5 94.5T560-320Z'/></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 -960 960 960'><path d='M560-131v-82q90-26 145-100t55-168q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 127-78 224.5T560-131ZM120-360v-240h160l200-200v640L280-360H120Zm440 40v-322q47 22 73.5 66t26.5 96q0 51-26.5 94.5T560-320Z'/></svg>");
+
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+
+  /* 底层暗色描边/半透明轨道（可选，提升未激活部分可见度） */
+  background: linear-gradient(
+    to top,
+    white 0%,
+    var(--scene-color) var(--volume-fill, 50%),
+    transparent var(--volume-fill, 50%),
+    transparent 100%
+  );
+  opacity: 0.5;
 }
 
 .stage-control .shadow-icon-next,
 .stage-control .control-figure-next {
   /* The visible path ends at 740, leaving 220 units of SVG whitespace. */
-  right: max(calc(2 * var(--header-inset) - var(--square-size) * 220 / 960), calc((100% - 3 * var(--square-size)) / 3));
+  right: max(
+    calc(2 * var(--header-inset) - var(--square-size) * 220 / 960),
+    calc((100% - 3 * var(--square-size)) / 3)
+  );
 }
 
 .stage-control .control-figure-next {
@@ -168,6 +210,7 @@ section:first-child {
 
 .control-figure-next:has(path:hover) {
   fill: color-mix(in srgb, var(--scene-color) 50%, rgba(255, 255, 255, 0.5));
+  opacity: 0.75;
 }
 
 main:has(.track-card__secondary.active) .control-figure-next path {
@@ -362,6 +405,8 @@ footer {
 }
 
 .left-footer {
+  position: relative;
+  z-index: 102;
   display: grid;
   grid-template-columns:
     minmax(0, 1fr)
@@ -376,10 +421,55 @@ footer {
   pointer-events: auto;
 }
 
+.about-link,
+.contact-link {
+  padding: 0;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  background: transparent;
+  cursor: pointer;
+  line-height: var(--footer-text-height);
+}
+
 .about-link {
   justify-self: stretch;
   text-align: left;
   text-decoration: underline;
+}
+
+.bottom-popup {
+  min-height: var(--footer-text-height);
+  white-space: nowrap;
+  transform: translateY(
+    calc(
+      var(--footer-height) +
+        (var(--footer-height) - var(--footer-text-height)) / 2 + 100%
+    )
+  );
+  visibility: hidden;
+  transition:
+    transform 1.2s ease,
+    visibility 1.2s;
+  position: absolute;
+  z-index: 101;
+  left: var(--header-inset);
+  bottom: calc(
+    var(--footer-height) + (var(--footer-height) - var(--footer-text-height)) /
+      2
+  );
+  margin: 0;
+  padding: 0;
+  color: white;
+  line-height: var(--footer-text-height);
+  text-align: left;
+  background: transparent;
+  pointer-events: none;
+}
+
+.bottom-popup.is-open {
+  transform: translateY(0);
+  visibility: visible;
 }
 
 .contact-link {
@@ -488,4 +578,144 @@ footer {
   .left-footer .footer-link:last-child {
     transform: translateX(100vw);
   }
+}
+
+/* Keep the hover area continuous between the button and the sliding rail. */
+.volume-control {
+  position: relative;
+  display: flex;
+  flex: 0 0 var(--footer-button-size);
+}
+
+.volume-panel {
+  position: fixed;
+  z-index: 101;
+  bottom: var(--volume-bottom, 65px);
+  left: 50%;
+  display: flex;
+  justify-content: center;
+  width: min(var(--volume-width, 224px), 80vw);
+  padding: 0 0 var(--volume-gap, 20px);
+  border: 0;
+  background: transparent;
+  transform: translate(-50%, calc(var(--volume-gap, 20px) + 20px));
+  visibility: hidden;
+  transition:
+    transform 1.2s ease 0.6s,
+    visibility 0s linear 1.8s;
+  pointer-events: auto;
+}
+
+section:first-child:has(.control-figure-volume.is-dragging) > .volume-panel,
+section:first-child:has(.volume-control:hover) > .volume-panel,
+.volume-panel:hover {
+  visibility: visible;
+  transform: translate(-50%, 0);
+  transition-delay: 0s;
+  transition: transform 1.2s ease;
+  pointer-events: auto;
+}
+
+#volume {
+  -webkit-appearance: none;
+  appearance: none;
+
+  box-sizing: content-box;
+  flex: 0 0 auto;
+  width: 220px;
+  padding: 16px;
+  height: 6px; /* 极细轨道 */
+  background: transparent;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin: 2%;
+
+  overflow: visible;
+  box-shadow: none;
+}
+
+#volume::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+
+  width: 18px;
+  height: 18px;
+  background-color: white; /* 极简炭黑/深灰 */
+  border-radius: 50%;
+  box-shadow: 6px 1px 6px rgba(0, 0, 0, 0.5);
+
+  /* 平滑缩放动画 */
+  transition:
+    transform 0.15s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.15s;
+}
+
+/* 滑块悬停与激活状态 */
+#volume:hover::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+
+#volume:active::-webkit-slider-thumb {
+  transform: scale(1.3);
+}
+
+#volume::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background-color: #171717;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition:
+    transform 0.15s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.15s;
+}
+
+/* Padding enlarges the hit area; only the native track paints the rail. */
+#volume::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    white var(--volume-fill, 50%),
+    black var(--volume-fill, 50%)
+  );
+  transition: background-color 0.15s;
+}
+
+#volume::-webkit-slider-thumb {
+  margin-top: -6px;
+}
+
+#volume::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    white var(--volume-fill, 50%),
+    black var(--volume-fill, 50%)
+  );
+  transition: background-color 0.15s;
+}
+
+.control-figure-volume.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.stage-control .control-figure-volume {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.control-figure-volume .volume-svg-mask {
+  pointer-events: auto;
+}
+
+.stage-control .control-figure-volume:has(.volume-svg-mask:hover),
+.stage-control .control-figure-volume.is-dragging {
+  opacity: 1;
 }
