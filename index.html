@@ -14,9 +14,12 @@
       style="position: absolute; width: 0; height: 0; overflow: hidden"
     >
       <defs>
-      <clipPath id="volume-hit-shape" clipPathUnits="objectBoundingBox">
-        <path transform="matrix(0.001041666667 0 0 0.001041666667 0 1)" d="M560-131v-82q90-26 145-100t55-168q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 127-78 224.5T560-131ZM120-360v-240h160l200-200v640L280-360H120Zm440 40v-322q47 22 73.5 66t26.5 96q0 51-26.5 94.5T560-320Z" />
-      </clipPath>
+        <clipPath id="volume-hit-shape" clipPathUnits="objectBoundingBox">
+          <path
+            transform="matrix(0.001041666667 0 0 0.001041666667 0 1)"
+            d="M560-131v-82q90-26 145-100t55-168q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 127-78 224.5T560-131ZM120-360v-240h160l200-200v640L280-360H120Zm440 40v-322q47 22 73.5 66t26.5 96q0 51-26.5 94.5T560-320Z"
+          />
+        </clipPath>
         <!-- 为播放图标添加内阴影，营造凹陷的视觉效果。 -->
         <filter
           id="fx-inner-shadow"
@@ -185,7 +188,11 @@
                 <path d="m8 5 12 7-12 7V5Z" />
               </svg>
             </button>
-            <button class="control-button next-button" type="button" aria-label="下一首">
+            <button
+              class="control-button next-button"
+              type="button"
+              aria-label="下一首"
+            >
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="m5 5 10 7-10 7V5ZM19 5v14" />
               </svg>
@@ -237,7 +244,15 @@
         </div>
         <div class="pan-panel">
           <span>MID</span>
-          <input id="pan" type="range" min="0" max="1" step="0.01" value="0.5" aria-label="MID / SIDE 混合" />
+          <input
+            id="pan"
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value="0.5"
+            aria-label="MID / SIDE 混合"
+          />
           <span>SIDE</span>
         </div>
         <footer class="right-footer">
@@ -258,7 +273,11 @@
                 <path d="m8 5 12 7-12 7V5Z" />
               </svg>
             </button>
-            <button class="control-button next-button" type="button" aria-label="下一首">
+            <button
+              class="control-button next-button"
+              type="button"
+              aria-label="下一首"
+            >
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="m5 5 10 7-10 7V5ZM19 5v14" />
               </svg>
@@ -270,5 +289,7 @@
 
     <!-- 页面交互逻辑。 -->
     <script src="script.js"></script>
+    <script src="scripts/songs.js"></script>
+    <script src="scripts/play-song.js"></script>
   </body>
 </html>

@@ -20,12 +20,20 @@
   initial-value: #241e25;
 }
 
+/* 只渐显页面背景，不改变文字与控件的透明度。 */
+@property --background-reveal {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 100%;
+}
+
 :root {
   --button-size: 40px;
   --header-circle-size: calc(var(--button-size) / 2);
   --header-inset: calc((80px - var(--header-circle-size)) / 2);
   --darker-scene-color: color-mix(in srgb, var(--scene-color) 30%, black);
   transition: --darker-scene-color 5s ease-out;
+  animation: backgroundReveal 3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 :root:hover {
@@ -61,7 +69,11 @@ body {
     /* Linux / Android / 开源字体降级 */ "Noto Sans TC",
     "Source Han Sans TC",
     /* 通用无衬线 */ sans-serif;
-  background: linear-gradient(to bottom, black, var(--darker-scene-color));
+  background: linear-gradient(
+    to bottom,
+    black,
+    color-mix(in srgb, var(--darker-scene-color) var(--background-reveal), black)
+  );
 }
 
 header {
@@ -237,6 +249,8 @@ main:has(.track-card__secondary.active) .stage-control figure {
 }
 
 .square {
+  /* 刷新时从下方 30px 滑入。 */
+  animation: squareSlideIn 2s cubic-bezier(0.16, 1, 0.3, 1) both;
   display: flex;
   position: relative;
   z-index: 1;
@@ -254,7 +268,12 @@ main:has(.track-card__secondary.active) .stage-control figure {
   flex: 17;
   min-height: 0;
   place-items: center;
-  background: linear-gradient(to top, var(--scene-color), gray);
+  /* 复用页面入场进度，两端颜色同时由黑色渐显。 */
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--scene-color) var(--background-reveal), black),
+    color-mix(in srgb, gray var(--background-reveal), black)
+  );
 }
 
 /* 三个图标共用淡入动画。音量和下一首只动画内部 SVG，

@@ -59,3 +59,15 @@
     --alpha: 50%; /* 完全不透明 */
   }
 }
+
+/* 刷新时从纯黑渐变到当前背景色；颜色目标仍随场景和 hover 更新。 */
+@keyframes backgroundReveal {
+  from { --background-reveal: 0%; }
+  to { --background-reveal: 100%; }
+}
+
+/* 使用相对定位偏移，避免 transform 改变内部 fixed 播放控件的定位基准。 */
+@keyframes squareSlideIn {
+  from { top: 30px; }
+  to { top: 0; }
+}
