@@ -1,8 +1,11 @@
 @import "styles/keyframes.css";
 
-/* 全局基础与场景颜色 */
+/* 01. 全局基础、可动画颜色与尺寸变量 */
 * {
   box-sizing: border-box;
+  /* 全站文字不可选中，避免点击与拖动控件时误选文字。 */
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 @property --scene-color {
@@ -29,7 +32,7 @@
   --darker-scene-color: color-mix(in srgb, var(--scene-color) 70%, black);
 }
 
-/* 页面框架 */
+/* 02. 页面框架：顶部装饰、双栏主体 */
 html,
 body {
   width: 100%;
@@ -104,7 +107,7 @@ section:first-child {
   overflow: hidden;
 }
 
-/* 主内容与场景卡片 */
+/* 03. 主内容、舞台图形与场景卡片 */
 .column-content {
   display: flex;
   position: relative;
@@ -117,7 +120,7 @@ section:first-child {
 .stage-control {
   display: flex;
   position: absolute;
-  /* Keep the page background available to the child icon's screen blend. */
+  /* 不创建额外层叠上下文，让子图形与页面背景进行 screen 混合。 */
   z-index: auto;
   inset: 0;
   align-items: center;
@@ -143,8 +146,9 @@ section:first-child {
 }
 
 .stage-control .shadow-icon-volume,
+/* 保留透明控制层的命中能力，只在轮廓悬停或拖动时亮起。 */
 .stage-control .control-figure-volume {
-  /* The visible path starts 120 units into the 960-unit viewBox. */
+  /* SVG 左侧有 120 / 960 的空白，定位时补偿这部分距离。 */
   left: max(
     calc(2 * var(--header-inset) - var(--square-size) * 120 / 960),
     calc((100% - 3 * var(--square-size)) / 3)
@@ -162,7 +166,7 @@ section:first-child {
   clip-path: url(#volume-hit-shape);
   touch-action: none; /* 防止移动端拖拽触发页面滚动 */
 
-  /* 1. 使用 SVG 矢量路径作为 Mask */
+  /* mask 控制绘制轮廓；clip-path 同时限制鼠标命中范围。 */
   -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 -960 960 960'><path d='M560-131v-82q90-26 145-100t55-168q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 127-78 224.5T560-131ZM120-360v-240h160l200-200v640L280-360H120Zm440 40v-322q47 22 73.5 66t26.5 96q0 51-26.5 94.5T560-320Z'/></svg>");
   mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 -960 960 960'><path d='M560-131v-82q90-26 145-100t55-168q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 127-78 224.5T560-131ZM120-360v-240h160l200-200v640L280-360H120Zm440 40v-322q47 22 73.5 66t26.5 96q0 51-26.5 94.5T560-320Z'/></svg>");
 
@@ -173,7 +177,7 @@ section:first-child {
   -webkit-mask-position: center;
   mask-position: center;
 
-  /* 底层暗色描边/半透明轨道（可选，提升未激活部分可见度） */
+  /* --volume-fill 由 JS 按 SVG 实际路径高度换算，亮色从下方填充。 */
   background: linear-gradient(
     to top,
     white 0%,
@@ -186,7 +190,7 @@ section:first-child {
 
 .stage-control .shadow-icon-next,
 .stage-control .control-figure-next {
-  /* The visible path ends at 740, leaving 220 units of SVG whitespace. */
+  /* SVG 右侧有 220 / 960 的空白，定位时补偿这部分距离。 */
   right: max(
     calc(2 * var(--header-inset) - var(--square-size) * 220 / 960),
     calc((100% - 3 * var(--square-size)) / 3)
@@ -201,7 +205,8 @@ section:first-child {
   mix-blend-mode: screen;
   transition:
     opacity 2s ease,
-    fill 0.25s ease;
+    fill 0.25s ease,
+    transform 0.08s ease;
 }
 
 .control-figure-next path {
@@ -264,6 +269,12 @@ main:has(.track-card__secondary.active) .stage-control figure {
   animation-delay: calc(var(--i) * 0.5s);
 }
 
+.shadow-icon-next {
+  transition:
+    opacity 2s ease,
+    transform 0.08s ease;
+}
+
 .shadow-icon-play {
   z-index: 100;
   padding-bottom: 0;
@@ -272,21 +283,8 @@ main:has(.track-card__secondary.active) .stage-control figure {
   mix-blend-mode: multiply;
 }
 
-.control-figure-play {
-  /* SVG 的矩形空白区域不接收鼠标事件，下面单独启用三角形 path。 */
-  pointer-events: none;
-  z-index: 100;
-  position: fixed;
-  width: var(--square-size);
-  height: var(--square-size);
-  fill: black;
-  mix-blend-mode: screen;
-  transition: fill 0.25s ease;
-}
-
+.control-figure-play,
 .control-figure-play-secondary {
-  /* 第二栏移动完成前隐藏控件；内部 path 也暂不接收鼠标事件。 */
-  visibility: hidden;
   /* SVG 空白区域不接收鼠标事件，内部 path 单独响应。 */
   pointer-events: none;
   z-index: 100;
@@ -295,7 +293,18 @@ main:has(.track-card__secondary.active) .stage-control figure {
   height: var(--square-size);
   fill: black;
   mix-blend-mode: screen;
-  transition: fill 0.25s ease;
+}
+
+.control-figure-play {
+  transition:
+    fill 0.25s ease,
+    transform 0.08s ease;
+}
+
+.control-figure-play-secondary {
+  /* 第二栏移动完成前隐藏控件；内部 path 也暂不接收鼠标事件。 */
+  visibility: hidden;
+  transition: fill 0.25s ease, transform 0.08s ease;
 }
 
 .control-figure-play path {
@@ -338,7 +347,7 @@ main:has(.track-card__secondary.active) .stage-control figure {
   background: black;
 }
 
-/* 添加场景提示与按钮 */
+/* 04. 添加轨道入口 */
 .add-track-hint {
   position: fixed;
   z-index: 100;
@@ -381,17 +390,7 @@ main:has(.track-card__secondary.active) .stage-control figure {
   transform: scale(2);
 }
 
-@media (min-width: 1800px) {
-  .scene-caption {
-    font-size: 1rem;
-  }
-
-  .add-track-hint {
-    font-size: 1rem;
-  }
-}
-
-/* 页脚布局与链接 */
+/* 05. 页脚布局、链接与文字弹层 */
 footer {
   display: flex;
   flex: 0 0 65px;
@@ -430,6 +429,14 @@ footer {
   background: transparent;
   cursor: pointer;
   line-height: var(--footer-text-height);
+  transition: color 0.12s ease, translate 0.12s ease;
+}
+
+/* 使用独立的 translate 属性，避免覆盖窄屏隐藏链接所用的 transform。 */
+.about-link:active,
+.contact-link:active {
+  color: rgb(172, 172, 172);
+  translate: 0 2px;
 }
 
 .about-link {
@@ -481,12 +488,11 @@ footer {
   text-align: right;
 }
 
-/* 页脚播放与控制按钮 */
+/* 06. 页脚播放与控制按钮 */
 .controls {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1fr;
   gap: 52px;
 }
 
@@ -524,9 +530,23 @@ footer {
   background: white;
 }
 
+/* 按下播放按钮时变灰并缩小，松开后恢复。 */
+.play-button:active {
+  background-color: rgb(172, 172, 172);
+}
+
 .play-button svg {
   fill: currentColor;
   stroke: none;
+}
+
+/* 下一首按钮按下时，图标向右轻推并亮起。 */
+.next-button {
+  transition: color 0.12s ease;
+}
+
+.next-button:active {
+  color: white;
 }
 
 .pan-button {
@@ -539,6 +559,166 @@ footer {
 .control-button:focus-visible {
   outline: 2px solid white;
   outline-offset: 3px;
+}
+
+/* 07. 音量滑轨：定位由 script.js 的 updateVolumeLayout 更新。 */
+.volume-control {
+  position: relative;
+  display: flex;
+  flex: 0 0 var(--footer-button-size);
+}
+
+/* 层级 101 低于 footer 的 102，收起时滑轨被页脚遮挡。
+   移开后等待 0.6 秒，再用 1.2 秒收起，结束后才隐藏命中区域。 */
+.volume-panel {
+  position: fixed;
+  z-index: 101;
+  bottom: var(--volume-bottom, 65px);
+  left: var(--volume-center, 50%);
+  display: flex;
+  justify-content: center;
+  width: min(var(--volume-width, 224px), 80vw);
+  padding: 0 0 var(--volume-gap, 20px);
+  border: 0;
+  background: transparent;
+  transform: translate(-50%, calc(var(--volume-gap, 20px) + 30px));
+  visibility: hidden;
+  transition:
+    transform 1.2s ease 0.6s,
+    visibility 0s linear 1.8s;
+  pointer-events: auto;
+}
+
+/* 拖动上方图形、悬停音量按钮或滑轨时，立即开始展开。 */
+section:first-child:has(.control-figure-volume.is-dragging) > .volume-panel,
+section:first-child:has(.volume-control:hover) > .volume-panel,
+.volume-panel:hover {
+  visibility: visible;
+  transform: translate(-50%, 0);
+  transition-delay: 0s;
+  transition: transform 1.2s ease;
+  pointer-events: auto;
+}
+
+#volume ,
+#pan {
+  -webkit-appearance: none;
+  appearance: none;
+
+  box-sizing: content-box;
+  flex: 0 0 auto;
+  width: 220px;
+  padding: 16px;
+  height: 6px; /* input 内容高度；可见轨道高度由伪元素单独指定。 */
+  background: transparent;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin: 2%;
+
+  overflow: visible;
+  box-shadow: none;
+}
+
+#volume::-webkit-slider-thumb ,
+#pan::-webkit-slider-thumb {
+  /* 对齐轨道中心；上下 padding 不改变可见轨道长度。 */
+  margin-top: -6px;
+  -webkit-appearance: none;
+  appearance: none;
+
+  width: 18px;
+  height: 18px;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 6px 1px 6px rgba(0, 0, 0, 0.5);
+
+  /* 平滑缩放动画 */
+  transition:
+    transform 0.15s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.15s;
+}
+
+/* 滑块悬停与激活状态 */
+#volume:hover::-webkit-slider-thumb ,
+#pan:hover::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+
+#volume:active::-webkit-slider-thumb ,
+#pan:active::-webkit-slider-thumb {
+  transform: scale(1.3);
+}
+
+#volume::-moz-range-thumb ,
+#pan::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background-color: #171717;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition:
+    transform 0.15s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.15s;
+}
+
+/* 原生轨道绘制可见部分；input 的透明 padding 只扩大鼠标命中区域。 */
+#volume::-webkit-slider-runnable-track ,
+#pan::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    white var(--volume-fill, 50%),
+    black var(--volume-fill, 50%)
+  );
+  transition: background-color 0.15s;
+}
+
+#volume::-moz-range-track ,
+#pan::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    white var(--volume-fill, 50%),
+    black var(--volume-fill, 50%)
+  );
+  transition: background-color 0.15s;
+}
+
+.control-figure-volume.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* 保留透明控制层的命中能力，只在轮廓悬停或拖动时亮起。 */
+.stage-control .control-figure-volume {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.control-figure-volume .volume-svg-mask {
+  pointer-events: auto;
+}
+
+.stage-control .control-figure-volume:has(.volume-svg-mask:hover),
+.stage-control .control-figure-volume.is-dragging {
+  opacity: 1;
+}
+
+/* 08. 响应式布局：宽屏字号、小屏布局、页脚容器查询 */
+@media (min-width: 1800px) {
+  .scene-caption {
+    font-size: 1rem;
+  }
+
+  .add-track-hint {
+    font-size: 1rem;
+  }
 }
 
 /* 小屏幕布局 */
@@ -580,142 +760,81 @@ footer {
   }
 }
 
-/* Keep the hover area continuous between the button and the sliding rail. */
-.volume-control {
-  position: relative;
-  display: flex;
-  flex: 0 0 var(--footer-button-size);
+/* 09. 按压反馈：舞台控制图形与对应阴影同步缩小。 */
+.control-figure-play-secondary:has(path:active),
+section:has(.control-figure-play-secondary path:active) .shadow-icon-play,
+.control-figure-play:has(path:active),
+section:has(.control-figure-play path:active) .shadow-icon-play {
+  transform: scale(0.95);
 }
 
-.volume-panel {
+.control-figure-next:has(path:active),
+.stage-control:has(.control-figure-next path:active) .shadow-icon-next {
+  transform: scale(0.95);
+}
+
+/* 右栏 PAN 面板：与音量滑轨相同的升降时长和延迟。 */
+.right-footer {
+  position: relative;
+  z-index: 102;
+}
+
+.pan-panel {
   position: fixed;
   z-index: 101;
-  bottom: var(--volume-bottom, 65px);
-  left: 50%;
+  left: var(--pan-center, 75%);
+  bottom: var(--pan-bottom, 65px);
   display: flex;
+  align-items: center;
   justify-content: center;
-  width: min(var(--volume-width, 224px), 80vw);
-  padding: 0 0 var(--volume-gap, 20px);
-  border: 0;
+  gap: 8px;
+  padding-bottom: var(--pan-gap, 20px);
+  color: white;
+  font-size: 0.75rem;
   background: transparent;
-  transform: translate(-50%, calc(var(--volume-gap, 20px) + 20px));
+  border: 0;
+  transform: translate(-50%, calc(var(--pan-gap, 20px) + 30px));
   visibility: hidden;
-  transition:
-    transform 1.2s ease 0.6s,
-    visibility 0s linear 1.8s;
-  pointer-events: auto;
+  transition: transform 1.2s ease 0.6s, visibility 0s linear 1.8s;
 }
 
-section:first-child:has(.control-figure-volume.is-dragging) > .volume-panel,
-section:first-child:has(.volume-control:hover) > .volume-panel,
-.volume-panel:hover {
+.track-card__secondary.active:has(.pan-button:hover) .pan-panel,
+.track-card__secondary.active:has(.pan-button:focus-visible) .pan-panel,
+.track-card__secondary.active .pan-panel:hover,
+.track-card__secondary.active .pan-panel:focus-within {
   visibility: visible;
   transform: translate(-50%, 0);
-  transition-delay: 0s;
   transition: transform 1.2s ease;
-  pointer-events: auto;
 }
 
-#volume {
-  -webkit-appearance: none;
-  appearance: none;
-
-  box-sizing: content-box;
-  flex: 0 0 auto;
-  width: 220px;
-  padding: 16px;
-  height: 6px; /* 极细轨道 */
-  background: transparent;
-  border-radius: 2px;
-  outline: none;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  margin: 2%;
-
-  overflow: visible;
-  box-shadow: none;
-}
-
-#volume::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-
-  width: 18px;
-  height: 18px;
-  background-color: white; /* 极简炭黑/深灰 */
-  border-radius: 50%;
-  box-shadow: 6px 1px 6px rgba(0, 0, 0, 0.5);
-
-  /* 平滑缩放动画 */
-  transition:
-    transform 0.15s cubic-bezier(0.2, 0, 0, 1),
-    background-color 0.15s;
-}
-
-/* 滑块悬停与激活状态 */
-#volume:hover::-webkit-slider-thumb {
-  transform: scale(1.15);
-}
-
-#volume:active::-webkit-slider-thumb {
-  transform: scale(1.3);
-}
-
-#volume::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  background-color: #171717;
-  border: none;
-  border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-  transition:
-    transform 0.15s cubic-bezier(0.2, 0, 0, 1),
-    background-color 0.15s;
-}
-
-/* Padding enlarges the hit area; only the native track paints the rail. */
-#volume::-webkit-slider-runnable-track {
-  height: 4px;
-  border-radius: 2px;
+/* PAN 滑块右侧使用半透明场景色，分界随滑块位置变化。 */
+#pan::-webkit-slider-runnable-track {
   background: linear-gradient(
     to right,
     white var(--volume-fill, 50%),
-    black var(--volume-fill, 50%)
+    color-mix(in srgb, var(--scene-color) 50%, transparent) var(--volume-fill, 50%)
   );
-  transition: background-color 0.15s;
 }
 
-#volume::-webkit-slider-thumb {
-  margin-top: -6px;
-}
-
-#volume::-moz-range-track {
-  height: 4px;
-  border-radius: 2px;
+#pan::-moz-range-track {
   background: linear-gradient(
     to right,
     white var(--volume-fill, 50%),
-    black var(--volume-fill, 50%)
+    color-mix(in srgb, var(--scene-color) 50%, transparent) var(--volume-fill, 50%)
   );
-  transition: background-color 0.15s;
 }
 
-.control-figure-volume.is-dragging {
-  cursor: grabbing;
-  user-select: none;
+/* 两侧面板的端点标签保持一致，可见轨道长度不变。 */
+.volume-panel,
+.pan-panel {
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 0.75rem;
 }
 
-.stage-control .control-figure-volume {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease;
-}
-
-.control-figure-volume .volume-svg-mask {
-  pointer-events: auto;
-}
-
-.stage-control .control-figure-volume:has(.volume-svg-mask:hover),
-.stage-control .control-figure-volume.is-dragging {
-  opacity: 1;
+.volume-panel > span,
+.pan-panel > span {
+  flex-shrink: 0;
+  white-space: nowrap;
 }

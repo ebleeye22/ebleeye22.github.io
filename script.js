@@ -104,6 +104,8 @@ function updateVolumeLayout() {
   const panel = document.querySelector(".volume-panel");
   if (!footer || !square || !controls || !panel) return;
   const footerRect = footer.getBoundingClientRect();
+  // 使用左栏页脚的视口中心，双栏过渡时由 ResizeObserver 持续同步。
+  panel.style.setProperty("--volume-center", `${footerRect.left + footerRect.width / 2}px`);
   const squareRect = square.getBoundingClientRect();
   const buttons = controls.querySelectorAll(".control-button");
   const first = buttons[0]?.getBoundingClientRect();
@@ -167,3 +169,29 @@ function finishVolumeDrag(event) {
 volumeFigure?.addEventListener("pointerup", finishVolumeDrag);
 volumeFigure?.addEventListener("pointercancel", finishVolumeDrag);
 volumeFigure?.addEventListener("lostpointercapture", finishVolumeDrag);
+
+// 将 PAN 面板定位到右栏中心，随双栏动画同步更新。
+function updatePanLayout() {
+  const footer = document.querySelector(".right-footer");
+  const square = document.querySelector(".track-card__secondary .square");
+  const panel = document.querySelector(".pan-panel");
+  if (!footer || !square || !panel) return;
+  const rect = footer.getBoundingClientRect();
+  const gap = Math.max(0, rect.top - square.getBoundingClientRect().bottom) / 10;
+  panel.style.setProperty("--pan-center", `${rect.left + rect.width / 2}px`);
+  panel.style.setProperty("--pan-bottom", `${window.innerHeight - rect.top - 10}px`);
+  panel.style.setProperty("--pan-gap", `${gap}px`);
+}
+const panLayoutObserver = new ResizeObserver(updatePanLayout);
+[document.querySelector(".right-footer"), document.querySelector(".track-card__secondary .square")]
+  .filter(Boolean).forEach((element) => panLayoutObserver.observe(element));
+window.addEventListener("resize", updatePanLayout);
+playBoxRight?.addEventListener("transitionend", updatePanLayout);
+updatePanLayout();
+
+const panSlider = document.getElementById("pan");
+function updatePanFill() {
+  panSlider?.style.setProperty("--volume-fill", `${Number(panSlider.value) * 100}%`);
+}
+panSlider?.addEventListener("input", updatePanFill);
+updatePanFill();

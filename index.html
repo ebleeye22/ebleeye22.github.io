@@ -142,6 +142,7 @@
           Hello World!
         </div>
         <div class="volume-panel">
+          <span>0%</span>
           <input
             id="volume"
             type="range"
@@ -151,6 +152,7 @@
             value="0.5"
             aria-label="音量"
           />
+          <span>100%</span>
         </div>
         <footer class="left-footer">
           <button
@@ -183,7 +185,7 @@
                 <path d="m8 5 12 7-12 7V5Z" />
               </svg>
             </button>
-            <button class="control-button" type="button" aria-label="下一首">
+            <button class="control-button next-button" type="button" aria-label="下一首">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="m5 5 10 7-10 7V5ZM19 5v14" />
               </svg>
@@ -233,6 +235,11 @@
             </div>
           </div>
         </div>
+        <div class="pan-panel">
+          <span>MID</span>
+          <input id="pan" type="range" min="0" max="1" step="0.01" value="0.5" aria-label="MID / SIDE 混合" />
+          <span>SIDE</span>
+        </div>
         <footer class="right-footer">
           <div class="controls right-controls" aria-label="音频控制">
             <button
@@ -251,7 +258,7 @@
                 <path d="m8 5 12 7-12 7V5Z" />
               </svg>
             </button>
-            <button class="control-button" type="button" aria-label="下一首">
+            <button class="control-button next-button" type="button" aria-label="下一首">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="m5 5 10 7-10 7V5ZM19 5v14" />
               </svg>
