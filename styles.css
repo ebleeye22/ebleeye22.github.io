@@ -324,7 +324,7 @@ main:has(.track-card__secondary.active) .stage-control figure {
 
 .track-progress {
   position: absolute;
-  top: 0;
+  bottom: 100%;
   left: 0;
   z-index: 101;
   width: 100%;
@@ -333,6 +333,11 @@ main:has(.track-card__secondary.active) .stage-control figure {
     var(--scene-color) 0%, var(--scene-color) var(--track-progress),
     transparent var(--track-progress), transparent 100%);
   pointer-events: none;
+}
+
+.track-card__secondary > .track-progress {
+  top: 0;
+  bottom: auto;
 }
 
 .track-progress.is-resetting {
