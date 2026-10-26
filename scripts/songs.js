@@ -13,4 +13,18 @@ const songs = [
     location: "Hangzhou, Zhejiang Province",
     rgb: "rgb(97, 83, 70)",
   },
+  {
+    audioFile: "songs/007-1.mp3",
+    cover: "covers/007-1.jpg",
+    time: "May 20, 2024",
+    location: "Dali City, Yunnan Province",
+    rgb: "rgb(128, 128, 96)",
+  },
+  {
+    audioFile: "songs/012.mp3",
+    cover: "covers/012.jpg",
+    time: "February 2, 2025",
+    location: "Tbilisi, Georgia",
+    rgb: "rgb(93, 31, 32)",
+  },
 ];

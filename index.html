@@ -51,6 +51,8 @@
     <!-- 双栏主内容：左侧主轨道，右侧辅助轨道。 -->
     <main>
       <section aria-label="左侧区域">
+        <span class="channel-readout">L 100% · R 100%</span>
+        <span class="volume-readout">V 50%</span>
         <div class="column-content">
           <!-- 轨道容器开始 -->
           <div class="figure-container">
@@ -105,6 +107,7 @@
 
           <!-- 主轨道封面、播放入口和媒体信息。 -->
           <div class="square">
+            <div class="track-progress" aria-hidden="true"></div>
             <div class="scene-image">
               <svg
                 class="shadow-icon-play"
@@ -211,8 +214,10 @@
 
       <!-- 辅助轨道：展示封面和独立的声道/播放控制。 -->
       <section aria-label="右侧区域" class="track-card__secondary">
+        <span class="channel-readout">L 100% · R 100%</span>
         <div class="column-content">
           <div class="square">
+            <div class="track-progress" aria-hidden="true"></div>
             <div class="scene-image">
               <svg
                 class="shadow-icon-play"
@@ -290,6 +295,6 @@
     <!-- 页面交互逻辑。 -->
     <script src="script.js"></script>
     <script src="scripts/songs.js"></script>
-    <script src="scripts/play-song.js"></script>
+    <script src="scripts/play-songs.js"></script>
   </body>
 </html>

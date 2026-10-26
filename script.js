@@ -195,3 +195,45 @@ function updatePanFill() {
 }
 panSlider?.addEventListener("input", updatePanFill);
 updatePanFill();
+
+// 调节时显示数据，停止操作两秒后淡出；按住拖动期间保持显示。
+function bindReadoutFeedback(controls, selector) {
+  const labels = document.querySelectorAll(selector);
+  const pointers = new Set();
+  let hideTimer;
+  function show() {
+    clearTimeout(hideTimer);
+    labels.forEach((label) => label.classList.add("is-visible"));
+  }
+  function hideLater() {
+    clearTimeout(hideTimer);
+    if (pointers.size) return;
+    hideTimer = setTimeout(() => {
+      labels.forEach((label) => label.classList.remove("is-visible"));
+    }, 2000);
+  }
+  controls.filter(Boolean).forEach((control) => {
+    control.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      pointers.add(event.pointerId);
+      show();
+    });
+    control.addEventListener("input", () => {
+      show();
+      hideLater();
+    });
+  });
+  function release(event) {
+    if (!pointers.delete(event.pointerId)) return;
+    hideLater();
+  }
+  window.addEventListener("pointerup", release);
+  window.addEventListener("pointercancel", release);
+  window.addEventListener("blur", () => {
+    pointers.clear();
+    hideLater();
+  });
+}
+
+bindReadoutFeedback([volumeSlider, volumeMask], ".volume-readout");
+bindReadoutFeedback([panSlider], ".channel-readout");

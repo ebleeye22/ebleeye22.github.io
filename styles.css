@@ -20,6 +20,13 @@
   initial-value: #241e25;
 }
 
+/* 悬停时的明暗比例与场景颜色分别控制过渡。 */
+@property --scene-brightness {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 30%;
+}
+
 /* 只渐显页面背景，不改变文字与控件的透明度。 */
 @property --background-reveal {
   syntax: "<percentage>";
@@ -29,15 +36,23 @@
 
 :root {
   --button-size: 40px;
+  --header-height: 65px;
   --header-circle-size: calc(var(--button-size) / 2);
   --header-inset: calc((80px - var(--header-circle-size)) / 2);
-  --darker-scene-color: color-mix(in srgb, var(--scene-color) 30%, black);
-  transition: --darker-scene-color 5s ease-out;
+  --scene-brightness: 30%;
+  --darker-scene-color: color-mix(
+    in srgb,
+    var(--scene-color) var(--scene-brightness),
+    black
+  );
+  transition:
+    --scene-color 2s ease,
+    --scene-brightness 5s cubic-bezier(0.16, 1, 0.3, 1);
   animation: backgroundReveal 3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 :root:hover {
-  --darker-scene-color: color-mix(in srgb, var(--scene-color) 70%, black);
+  --scene-brightness: 70%;
 }
 
 /* 02. 页面框架：顶部装饰、双栏主体 */
@@ -72,15 +87,19 @@ body {
   background: linear-gradient(
     to bottom,
     black,
-    color-mix(in srgb, var(--darker-scene-color) var(--background-reveal), black)
+    color-mix(
+      in srgb,
+      var(--darker-scene-color) var(--background-reveal),
+      black
+    )
   );
 }
 
 header {
   display: flex;
-  flex: 0 0 65px;
+  flex: 0 0 var(--header-height);
   align-items: center;
-  height: 65px;
+  height: var(--header-height);
   padding: 0 var(--header-inset);
   color: white;
   background: black;
@@ -102,6 +121,7 @@ main {
 }
 
 section {
+  position: relative;
   display: flex;
   flex: 0 0 50%;
   flex-direction: column;
@@ -109,6 +129,39 @@ section {
   min-height: 0;
   --square-size: min(40vh, 40vw);
   --footer-button-size: 40px;
+}
+
+.channel-readout,
+.volume-readout,
+.add-track-hint {
+  color: rgb(255 255 255 / 60%);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.channel-readout,
+.volume-readout {
+  position: absolute;
+  top: calc((var(--header-height) - var(--header-circle-size)) / 2);
+  left: var(--header-inset);
+  z-index: 101;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.channel-readout.is-visible,
+.volume-readout.is-visible {
+  opacity: 1;
+  transition-duration: 0.2s;
+}
+
+.volume-readout {
+  margin-top: 2em;
 }
 
 section:first-child {
@@ -144,7 +197,7 @@ section:first-child {
   height: var(--square-size);
   flex: 0 0 var(--square-size);
   margin: 0;
-  transition: opacity 2s ease;
+  transition: opacity 2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .stage-control svg {
@@ -169,6 +222,7 @@ section:first-child {
 
 .control-figure-volume {
   position: absolute;
+  mix-blend-mode: screen;
 }
 
 .volume-svg-mask {
@@ -262,18 +316,52 @@ main:has(.track-card__secondary.active) .stage-control figure {
   box-shadow: 0 8px 24px rgb(0 0 0 / 30%);
 }
 
+@property --track-progress {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+.track-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 101;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right,
+    var(--scene-color) 0%, var(--scene-color) var(--track-progress),
+    transparent var(--track-progress), transparent 100%);
+  pointer-events: none;
+}
+
+.track-progress.is-resetting {
+  transition: --track-progress 0.3s ease-out;
+}
+
 .scene-image {
   display: grid;
   position: relative;
   flex: 17;
   min-height: 0;
   place-items: center;
-  /* 复用页面入场进度，两端颜色同时由黑色渐显。 */
-  background: linear-gradient(
-    to top,
-    color-mix(in srgb, var(--scene-color) var(--background-reveal), black),
-    color-mix(in srgb, gray var(--background-reveal), black)
-  );
+  overflow: hidden;
+  background: linear-gradient(to bottom, gray, var(--scene-color));
+}
+
+.scene-cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: translateX(-100%);
+  transition: transform 3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.scene-cover.is-visible {
+  transform: translateX(0);
 }
 
 /* 三个图标共用淡入动画。音量和下一首只动画内部 SVG，
@@ -323,7 +411,9 @@ main:has(.track-card__secondary.active) .stage-control figure {
 .control-figure-play-secondary {
   /* 第二栏移动完成前隐藏控件；内部 path 也暂不接收鼠标事件。 */
   visibility: hidden;
-  transition: fill 0.25s ease, transform 0.08s ease;
+  transition:
+    fill 0.25s ease,
+    transform 0.08s ease;
 }
 
 .control-figure-play path {
@@ -372,9 +462,6 @@ main:has(.track-card__secondary.active) .stage-control figure {
   z-index: 100;
   top: 52%;
   right: 2.5vw;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 0.8rem;
-  font-weight: 300;
   text-decoration: underline;
   pointer-events: none;
   animation: fadeIn 2s ease-in-out both;
@@ -399,7 +486,7 @@ main:has(.track-card__secondary.active) .stage-control figure {
   cursor: pointer;
   --i: 2;
   animation:
-    slideInFromRight 3s ease-out both,
+    slideInFromRight 3s cubic-bezier(0.16, 1, 0.3, 1) both,
     spin 10s linear 1s infinite both;
   animation-delay: calc(var(--i) * 0s);
   transition: transform 10s cubic-bezier(0.075, 0.82, 0.165, 1);
@@ -448,7 +535,9 @@ footer {
   background: transparent;
   cursor: pointer;
   line-height: var(--footer-text-height);
-  transition: color 0.12s ease, translate 0.12s ease;
+  transition:
+    color 0.12s ease,
+    translate 0.12s ease;
 }
 
 /* 使用独立的 translate 属性，避免覆盖窄屏隐藏链接所用的 transform。 */
@@ -619,7 +708,7 @@ section:first-child:has(.volume-control:hover) > .volume-panel,
   pointer-events: auto;
 }
 
-#volume ,
+#volume,
 #pan {
   -webkit-appearance: none;
   appearance: none;
@@ -640,7 +729,7 @@ section:first-child:has(.volume-control:hover) > .volume-panel,
   box-shadow: none;
 }
 
-#volume::-webkit-slider-thumb ,
+#volume::-webkit-slider-thumb,
 #pan::-webkit-slider-thumb {
   /* 对齐轨道中心；上下 padding 不改变可见轨道长度。 */
   margin-top: -6px;
@@ -660,17 +749,17 @@ section:first-child:has(.volume-control:hover) > .volume-panel,
 }
 
 /* 滑块悬停与激活状态 */
-#volume:hover::-webkit-slider-thumb ,
+#volume:hover::-webkit-slider-thumb,
 #pan:hover::-webkit-slider-thumb {
   transform: scale(1.15);
 }
 
-#volume:active::-webkit-slider-thumb ,
+#volume:active::-webkit-slider-thumb,
 #pan:active::-webkit-slider-thumb {
   transform: scale(1.3);
 }
 
-#volume::-moz-range-thumb ,
+#volume::-moz-range-thumb,
 #pan::-moz-range-thumb {
   width: 14px;
   height: 14px;
@@ -684,7 +773,7 @@ section:first-child:has(.volume-control:hover) > .volume-panel,
 }
 
 /* 原生轨道绘制可见部分；input 的透明 padding 只扩大鼠标命中区域。 */
-#volume::-webkit-slider-runnable-track ,
+#volume::-webkit-slider-runnable-track,
 #pan::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 2px;
@@ -696,7 +785,7 @@ section:first-child:has(.volume-control:hover) > .volume-panel,
   transition: background-color 0.15s;
 }
 
-#volume::-moz-range-track ,
+#volume::-moz-range-track,
 #pan::-moz-range-track {
   height: 4px;
   border-radius: 2px;
@@ -727,17 +816,6 @@ section:first-child:has(.volume-control:hover) > .volume-panel,
 .stage-control .control-figure-volume:has(.volume-svg-mask:hover),
 .stage-control .control-figure-volume.is-dragging {
   opacity: 1;
-}
-
-/* 08. 响应式布局：宽屏字号、小屏布局、页脚容器查询 */
-@media (min-width: 1800px) {
-  .scene-caption {
-    font-size: 1rem;
-  }
-
-  .add-track-hint {
-    font-size: 1rem;
-  }
 }
 
 /* 小屏幕布局 */
@@ -814,7 +892,9 @@ section:has(.control-figure-play path:active) .shadow-icon-play {
   border: 0;
   transform: translate(-50%, calc(var(--pan-gap, 20px) + 30px));
   visibility: hidden;
-  transition: transform 1.2s ease 0.6s, visibility 0s linear 1.8s;
+  transition:
+    transform 1.2s ease 0.6s,
+    visibility 0s linear 1.8s;
 }
 
 .track-card__secondary.active:has(.pan-button:hover) .pan-panel,
@@ -831,7 +911,8 @@ section:has(.control-figure-play path:active) .shadow-icon-play {
   background: linear-gradient(
     to right,
     white var(--volume-fill, 50%),
-    color-mix(in srgb, var(--scene-color) 50%, transparent) var(--volume-fill, 50%)
+    color-mix(in srgb, var(--scene-color) 50%, transparent)
+      var(--volume-fill, 50%)
   );
 }
 
@@ -839,7 +920,8 @@ section:has(.control-figure-play path:active) .shadow-icon-play {
   background: linear-gradient(
     to right,
     white var(--volume-fill, 50%),
-    color-mix(in srgb, var(--scene-color) 50%, transparent) var(--volume-fill, 50%)
+    color-mix(in srgb, var(--scene-color) 50%, transparent)
+      var(--volume-fill, 50%)
   );
 }
 
