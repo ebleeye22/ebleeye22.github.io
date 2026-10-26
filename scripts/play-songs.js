@@ -83,7 +83,10 @@ function cancelPlaybackFade(node) {
 
 function fadePlaybackTo(value, node = fadeGain, duration = fadeDuration) {
   cancelPlaybackFade(node);
-  node.gain.linearRampToValueAtTime(value, audioContext.currentTime + duration);
+  const now = audioContext.currentTime;
+  // 必须明确标记本次过渡的起点，避免沿用几分钟前的淡入结束时间。
+  node.gain.setValueAtTime(node.gain.value, now);
+  node.gain.linearRampToValueAtTime(value, now + duration);
   return new Promise((resolve) => {
     const timer = setTimeout(() => {
       activeFades.delete(node);
