@@ -237,3 +237,34 @@ function bindReadoutFeedback(controls, selector) {
 
 bindReadoutFeedback([volumeSlider, volumeMask], ".volume-readout");
 bindReadoutFeedback([panSlider], ".channel-readout");
+
+// 闲置三十秒后缓慢隐藏播放阴影，任何操作都会恢复显示。
+let playShadowIdleTimer;
+const activeShadowPointers = new Set();
+function resetPlayShadowIdle() {
+  clearTimeout(playShadowIdleTimer);
+  document.documentElement.classList.remove("is-idle");
+  if (activeShadowPointers.size) return;
+  playShadowIdleTimer = setTimeout(() => {
+    document.documentElement.classList.add("is-idle");
+  }, 30000);
+}
+for (const event of ["pointermove", "keydown", "wheel", "input", "scroll"]) {
+  window.addEventListener(event, resetPlayShadowIdle, { passive: true, capture: true });
+}
+window.addEventListener("pointerdown", (event) => {
+  activeShadowPointers.add(event.pointerId);
+  resetPlayShadowIdle();
+}, { passive: true });
+for (const event of ["pointerup", "pointercancel"]) {
+  window.addEventListener(event, (event) => {
+    activeShadowPointers.delete(event.pointerId);
+    resetPlayShadowIdle();
+  }, { passive: true });
+}
+window.addEventListener("blur", () => {
+  activeShadowPointers.clear();
+  resetPlayShadowIdle();
+});
+window.addEventListener("focus", resetPlayShadowIdle);
+resetPlayShadowIdle();

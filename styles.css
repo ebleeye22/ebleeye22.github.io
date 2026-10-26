@@ -390,9 +390,18 @@ main:has(.track-card__secondary.active) .stage-control figure {
 .shadow-icon-play {
   z-index: 100;
   padding-bottom: 0;
-  transition: transform 0.05s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
+  animation-fill-mode: backwards;
+  transition:
+    opacity 1s ease,
+    transform 0.05s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
   mix-blend-mode: multiply;
+}
+
+:root.is-idle .shadow-icon-play {
+  opacity: 0;
+  transition-duration: 5s, 0.05s;
 }
 
 .control-figure-play,
