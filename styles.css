@@ -399,7 +399,8 @@ main:has(.track-card__secondary.active) .stage-control figure {
   mix-blend-mode: multiply;
 }
 
-:root.is-idle .shadow-icon-play {
+/* 封面显示后才在闲置时淡出；未播放、没有封面时保留播放提示。 */
+:root.is-idle .scene-image:has(.scene-cover.is-visible) .shadow-icon-play {
   opacity: 0;
   transition-duration: 5s, 0.05s;
 }
@@ -464,10 +465,17 @@ main:has(.track-card__secondary.active) .stage-control figure {
   justify-content: center;
   gap: 0.175rem;
   min-height: 0;
+  min-width: 0;
+  overflow: hidden;
   padding: 0.25rem 1rem;
   color: white;
   font-size: 0.75rem;
   background: black;
+}
+
+.scene-caption span {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* 04. 添加轨道入口 */

@@ -65,7 +65,10 @@ const playBoxRight = document.querySelector(".track-card__secondary");
 const addTrackHint = document.querySelector(".add-track-hint");
 
 if (addTrackBtn) {
-  addTrackBtn.addEventListener("click", () => {
+  addTrackBtn.addEventListener("click", (event) => {
+    // 鼠标点击后释放焦点，避免随后按空格时显示按钮的键盘焦点轮廓。
+    // 键盘激活的 detail 为 0，保留焦点以支持 Tab / Enter 操作。
+    if (event.detail > 0) addTrackBtn.blur();
     // 展开或收起时立即隐藏并禁用控件，等待展开完成后再启用。
     playBoxRight?.classList.remove("controls-ready");
     playBoxRight?.classList.toggle("active");
@@ -133,7 +136,7 @@ function updateVolumeFill(volume) {
     mask.style.setProperty("--volume-fill", maskFill);
   });
 }
-updateVolumeFill(Number(volumeSlider?.value ?? 0.5));
+updateVolumeFill(Number(volumeSlider?.value ?? 0.75));
 const volumeFigure = document.querySelector(".control-figure-volume");
 const volumeMask = volumeFigure?.querySelector(".volume-svg-mask");
 let volumeDrag = null;

@@ -5,6 +5,7 @@ const audioContext =
     ? new (window.AudioContext || window.webkitAudioContext)()
     : null;
 const masterGain = audioContext ? audioContext.createGain() : null;
+const primarySongGain = audioContext ? audioContext.createGain() : null;
 const fadeGain = audioContext ? audioContext.createGain() : null;
 const fadeDuration = 2;
 const primaryBalance = createTrackBalance(fadeGain);
@@ -32,13 +33,14 @@ function createTrackBalance(input) {
 
 if (audioContext && masterGain) {
   const audioSource = audioContext.createMediaElementSource(audioPlayer);
-  audioSource.connect(fadeGain);
+  audioSource.connect(primarySongGain);
+  primarySongGain.connect(fadeGain);
   masterGain.connect(audioContext.destination);
-  masterGain.gain.value = 0.5;
+  masterGain.gain.value = 0.75;
   fadeGain.gain.value = 0;
 }
 
-// 2. 初始音量设为 50% (0.5)
+// 媒体元素保持原始音量，界面初始总音量为 75%。
 audioPlayer.volume = 1;
 
 // 左侧播放图形和播放按钮共用同一个播放入口。
@@ -60,7 +62,20 @@ function setOutputVolume(volume) {
     level, audioContext.currentTime, 0.02,
   );
 }
-setOutputVolume(Number(document.getElementById("volume")?.value ?? 0.5));
+setOutputVolume(Number(document.getElementById("volume")?.value ?? 0.75));
+
+// 歌曲修正独立于总音量、淡入淡出和声道平衡，不更新界面读数。
+const songVolumeLevels = { normal: 1, lower: 2, higher: 0.5 };
+
+function applySongVolume(song, node) {
+  if (!node || !audioContext) return;
+  const level = Object.hasOwn(songVolumeLevels, song.volume)
+    ? songVolumeLevels[song.volume] : 1;
+  node.gain.setValueAtTime(level, audioContext.currentTime);
+  if (level !== 1) {
+    console.info(`[歌曲音量] ${song.audioFile}: volume="${song.volume}"，${level > 1 ? "提高" : "降低"}至 ${level * 100}%`);
+  }
+}
 
 function cancelPlaybackFade(node) {
   if (!node || !audioContext) return;
@@ -129,7 +144,10 @@ function selectSong(index, updateSource = true) {
   currentSongIndex = index;
   const song = songs[index];
   audioPlayer.dispatchEvent(new CustomEvent("trackchange", { detail: song.audioFile }));
-  if (updateSource) audioPlayer.src = song.audioFile;
+  if (updateSource) {
+    applySongVolume(song, primarySongGain);
+    audioPlayer.src = song.audioFile;
+  }
   document.documentElement.style.setProperty("--scene-color", song.rgb);
 
   const leftSection = leftPlayButton.closest("section");
@@ -186,6 +204,7 @@ async function changePlayback(forceNext = false) {
         if (version !== primaryPlaybackVersion) return;
         audioPlayer.pause();
       }
+      applySongVolume(songs[currentSongIndex], primarySongGain);
       audioPlayer.src = targetSource;
       fadeGain.gain.setValueAtTime(0, audioContext.currentTime);
     }
@@ -210,8 +229,48 @@ function togglePlayback() {
 leftPlayFigure?.addEventListener("click", togglePlayback);
 leftPlayButton?.addEventListener("click", togglePlayback);
 
+function toggleKeyboardPlayback() {
+  if (!secondarySection?.classList.contains("active")) return togglePlayback();
+  const primaryPlaying = isStartingPlayback ? primaryPlaybackIntent :
+    !audioPlayer.paused && !audioPlayer.ended && !audioPlayer.error;
+  const secondaryPlaying = secondaryPlaybackPending ? secondaryPlaybackIntent :
+    !secondaryAudioPlayer.paused && !secondaryAudioPlayer.ended && !secondaryAudioPlayer.error;
+  if (primaryPlaying || secondaryPlaying) {
+    // 只暂停正在播放（或正在启动）的轨道，已暂停的轨道保持暂停。
+    if (primaryPlaying) changePlayback();
+    if (secondaryPlaying) changeSecondaryPlayback();
+    return;
+  }
+  // 两次调用在首次 await 前确定各自选曲，并发启动两轨。
+  return Promise.all([changePlayback(), changeSecondaryPlayback()]);
+}
+
+document.addEventListener("keydown", (event) => {
+  if (!["Space", "ArrowRight"].includes(event.code) || event.defaultPrevented || event.isComposing ||
+      event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+  const target = event.target;
+  // 输入区域保留空格行为；按钮上的空格统一用于播放，避免切换单双轨。
+  if (target instanceof Element &&
+      (target.isContentEditable || target.closest(
+        "input, textarea, select, [role='slider'], [role='textbox']",
+      ))) return;
+  event.preventDefault();
+  if (event.repeat) return;
+  if (event.code === "Space") toggleKeyboardPlayback();
+  else playNextKeyboardSong();
+});
+
 function playNextSong() {
   return changePlayback(true);
+}
+
+function playNextKeyboardSong() {
+  if (secondarySection?.classList.contains("active")) {
+    // 与空格使用相同的单双栏作用范围，分别切换两轨歌曲。
+    return Promise.all([playNextSong(), changeSecondaryPlayback(true)]);
+  } else {
+    return playNextSong();
+  }
 }
 
 document.querySelector(".control-figure-next")?.addEventListener("click", playNextSong);
@@ -242,6 +301,7 @@ updatePlaybackIcons();
 
 // 右侧轨道共享 AudioContext 和总音量，使用独立的播放器和淡入淡出节点。
 const secondaryAudioPlayer = new Audio();
+const secondarySongGain = audioContext ? audioContext.createGain() : null;
 const secondaryFadeGain = audioContext ? audioContext.createGain() : null;
 const secondaryBalance = createTrackBalance(secondaryFadeGain);
 const secondarySection = document.querySelector(".track-card__secondary");
@@ -254,7 +314,8 @@ let secondaryPlaybackIntent = false;
 
 if (audioContext && secondaryFadeGain) {
   const source = audioContext.createMediaElementSource(secondaryAudioPlayer);
-  source.connect(secondaryFadeGain);
+  source.connect(secondarySongGain);
+  secondarySongGain.connect(secondaryFadeGain);
   secondaryFadeGain.gain.value = 0;
 }
 
@@ -274,7 +335,10 @@ function selectSecondarySong(forceNext = false, updateSource = true) {
   const { song, index } = candidates[Math.floor(Math.random() * candidates.length)];
   secondarySongIndex = index;
   secondaryAudioPlayer.dispatchEvent(new CustomEvent("trackchange", { detail: song.audioFile }));
-  if (updateSource) secondaryAudioPlayer.src = song.audioFile;
+  if (updateSource) {
+    applySongVolume(song, secondarySongGain);
+    secondaryAudioPlayer.src = song.audioFile;
+  }
   document.documentElement.style.setProperty("--scene-color", song.rgb);
   const captions = secondarySection.querySelectorAll(".scene-caption span");
   captions[0].textContent = song.time;
@@ -315,6 +379,7 @@ async function changeSecondaryPlayback(forceNext = false) {
         if (version !== secondaryPlaybackVersion) return;
         secondaryAudioPlayer.pause();
       }
+      applySongVolume(songs[secondarySongIndex], secondarySongGain);
       secondaryAudioPlayer.src = targetSource;
       secondaryFadeGain.gain.setValueAtTime(0, audioContext.currentTime);
     }
