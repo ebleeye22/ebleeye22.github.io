@@ -13,7 +13,15 @@
 const aboutButton = document.querySelector(".about-link");
 const contactButton = document.querySelector(".contact-link");
 const aboutPopup = document.querySelector(".bottom-popup");
-let popupMessage = "Hello World!";
+const aboutMessage = `欢迎来到阳光奶牛的录音库，这里有一些田野录音。
+Welcome to SunshineCow's Soundscape Library, here you'll find a selection of recordings.
+希望这些录音能带来一段平静的时光，希望你能喜欢 ♥
+We hope these recordings bring you a moment of peace, enjoy! ♥`;
+const contactMessage = `在录音和网站开发领域我都是一个业余者，如果收到改进意见我会很高兴。
+In the fields of both audio recording and website development, We're amateur, we’d be happy to receive suggestions for improvement.
+Xiaohongshu: 1521947519
+Email: ebleeye33@qq.com`;
+let popupMessage = aboutMessage;
 let typingTimer;
 let typingVersion = 0;
 
@@ -25,8 +33,14 @@ function selectPopupMessage(message) {
   const version = ++typingVersion;
   popupMessage = message;
   aboutPopup.classList.toggle("is-open", shouldOpen);
-  aboutButton?.setAttribute("aria-expanded", String(shouldOpen && message === "Hello World!"));
-  contactButton?.setAttribute("aria-expanded", String(shouldOpen && message === "Contact Me!"));
+  aboutButton?.setAttribute(
+    "aria-expanded",
+    String(shouldOpen && message === aboutMessage),
+  );
+  contactButton?.setAttribute(
+    "aria-expanded",
+    String(shouldOpen && message === contactMessage),
+  );
   aboutPopup.setAttribute("aria-hidden", String(!shouldOpen));
   aboutPopup.setAttribute("aria-busy", "false");
 
@@ -37,27 +51,44 @@ function selectPopupMessage(message) {
   }
 
   aboutPopup.setAttribute("aria-busy", "true");
-  let deleting = true;
+  let oldText = aboutPopup.textContent;
+  let typedLength = 0;
+
+  function renderMessage() {
+    aboutPopup.textContent = oldText + (oldText ? "\n" : "") + message.slice(0, typedLength);
+  }
+
+  function deleteOldCharacter() {
+    if (version !== typingVersion) return;
+    oldText = oldText.slice(0, -1);
+    renderMessage();
+    if (!oldText.length) {
+      aboutPopup.setAttribute("aria-busy", "false");
+      return;
+    }
+    const delay = /\p{Script=Han}/u.test(oldText.slice(-1)) ? 60 : 30;
+    typingTimer = setTimeout(deleteOldCharacter, delay);
+  }
+
   function typeNextCharacter() {
     if (version !== typingVersion) return;
-    const current = aboutPopup.textContent;
-    if (deleting && current.length) {
-      aboutPopup.textContent = current.slice(0, -1);
-    } else {
-      deleting = false;
-      aboutPopup.textContent = message.slice(0, current.length + 1);
-      if (aboutPopup.textContent === message) {
-        aboutPopup.setAttribute("aria-busy", "false");
-        return;
-      }
+    typedLength += 1;
+    renderMessage();
+    if (typedLength === message.length) {
+      const delay = /\p{Script=Han}/u.test(oldText.slice(-1)) ? 60 : 30;
+      typingTimer = setTimeout(deleteOldCharacter, delay);
+      return;
     }
-    typingTimer = setTimeout(typeNextCharacter, deleting ? 110 : 180);
+    const delay = /\p{Script=Han}/u.test(message.charAt(typedLength)) ? 60 : 30;
+    typingTimer = setTimeout(typeNextCharacter, delay);
   }
   typeNextCharacter();
 }
 
-aboutButton?.addEventListener("click", () => selectPopupMessage("Hello World!"));
-contactButton?.addEventListener("click", () => selectPopupMessage("Contact Me!"));
+aboutButton?.addEventListener("click", () => selectPopupMessage(aboutMessage));
+contactButton?.addEventListener("click", () =>
+  selectPopupMessage(contactMessage),
+);
 
 // 监听添加轨道按钮的点击事件，切换右侧播放区域的显示状态
 const addTrackBtn = document.querySelector(".add-track-button");
@@ -108,20 +139,31 @@ function updateVolumeLayout() {
   if (!footer || !square || !controls || !panel) return;
   const footerRect = footer.getBoundingClientRect();
   // 使用左栏页脚的视口中心，双栏过渡时由 ResizeObserver 持续同步。
-  panel.style.setProperty("--volume-center", `${footerRect.left + footerRect.width / 2}px`);
+  panel.style.setProperty(
+    "--volume-center",
+    `${footerRect.left + footerRect.width / 2}px`,
+  );
   const squareRect = square.getBoundingClientRect();
   const buttons = controls.querySelectorAll(".control-button");
   const first = buttons[0]?.getBoundingClientRect();
   const last = buttons[buttons.length - 1]?.getBoundingClientRect();
   const gap = Math.max(0, footerRect.top - squareRect.bottom) / 10;
-  panel.style.setProperty("--volume-bottom", `${window.innerHeight - footerRect.top - 10}px`);
+  panel.style.setProperty(
+    "--volume-bottom",
+    `${window.innerHeight - footerRect.top - 10}px`,
+  );
   panel.style.setProperty("--volume-gap", `${gap}px`);
-  if (first && last) panel.style.setProperty("--volume-width", `${last.right - first.left}px`);
+  if (first && last)
+    panel.style.setProperty("--volume-width", `${last.right - first.left}px`);
 }
 
 const volumeLayoutObserver = new ResizeObserver(updateVolumeLayout);
-[document.querySelector(".left-footer"), document.querySelector("section:first-child .square")]
-  .filter(Boolean).forEach((element) => volumeLayoutObserver.observe(element));
+[
+  document.querySelector(".left-footer"),
+  document.querySelector("section:first-child .square"),
+]
+  .filter(Boolean)
+  .forEach((element) => volumeLayoutObserver.observe(element));
 window.addEventListener("resize", updateVolumeLayout);
 updateVolumeLayout();
 
@@ -132,9 +174,11 @@ function updateVolumeFill(volume) {
   // Map the volume to that painted range rather than the surrounding whitespace.
   const level = Math.max(0, Math.min(1, volume));
   const maskFill = `${((131 + level * 700) / 960) * 100}%`;
-  document.querySelectorAll(".volume-svg-mask, .control-svg-mask").forEach((mask) => {
-    mask.style.setProperty("--volume-fill", maskFill);
-  });
+  document
+    .querySelectorAll(".volume-svg-mask, .control-svg-mask")
+    .forEach((mask) => {
+      mask.style.setProperty("--volume-fill", maskFill);
+    });
 }
 updateVolumeFill(Number(volumeSlider?.value ?? 0.75));
 const volumeFigure = document.querySelector(".control-figure-volume");
@@ -142,13 +186,22 @@ const volumeMask = volumeFigure?.querySelector(".volume-svg-mask");
 let volumeDrag = null;
 
 volumeFigure?.addEventListener("pointerdown", (event) => {
-  if (!volumeSlider || event.target !== volumeMask || event.button !== 0 || volumeDrag) return;
+  if (
+    !volumeSlider ||
+    event.target !== volumeMask ||
+    event.button !== 0 ||
+    volumeDrag
+  )
+    return;
   event.preventDefault();
   volumeDrag = {
     pointerId: event.pointerId,
     startY: event.clientY,
     startVolume: Number(volumeSlider.value),
-    height: Math.max(1, volumeMask.getBoundingClientRect().height * 700 / 960),
+    height: Math.max(
+      1,
+      (volumeMask.getBoundingClientRect().height * 700) / 960,
+    ),
   };
   volumeFigure.setPointerCapture(event.pointerId);
   volumeFigure.classList.add("is-dragging");
@@ -156,7 +209,9 @@ volumeFigure?.addEventListener("pointerdown", (event) => {
 
 volumeFigure?.addEventListener("pointermove", (event) => {
   if (!volumeDrag || event.pointerId !== volumeDrag.pointerId) return;
-  const next = volumeDrag.startVolume + (volumeDrag.startY - event.clientY) / volumeDrag.height;
+  const next =
+    volumeDrag.startVolume +
+    (volumeDrag.startY - event.clientY) / volumeDrag.height;
   volumeSlider.value = String(Math.max(0, Math.min(1, next)));
   volumeSlider.dispatchEvent(new Event("input", { bubbles: true }));
 });
@@ -180,21 +235,32 @@ function updatePanLayout() {
   const panel = document.querySelector(".pan-panel");
   if (!footer || !square || !panel) return;
   const rect = footer.getBoundingClientRect();
-  const gap = Math.max(0, rect.top - square.getBoundingClientRect().bottom) / 10;
+  const gap =
+    Math.max(0, rect.top - square.getBoundingClientRect().bottom) / 10;
   panel.style.setProperty("--pan-center", `${rect.left + rect.width / 2}px`);
-  panel.style.setProperty("--pan-bottom", `${window.innerHeight - rect.top - 10}px`);
+  panel.style.setProperty(
+    "--pan-bottom",
+    `${window.innerHeight - rect.top - 10}px`,
+  );
   panel.style.setProperty("--pan-gap", `${gap}px`);
 }
 const panLayoutObserver = new ResizeObserver(updatePanLayout);
-[document.querySelector(".right-footer"), document.querySelector(".track-card__secondary .square")]
-  .filter(Boolean).forEach((element) => panLayoutObserver.observe(element));
+[
+  document.querySelector(".right-footer"),
+  document.querySelector(".track-card__secondary .square"),
+]
+  .filter(Boolean)
+  .forEach((element) => panLayoutObserver.observe(element));
 window.addEventListener("resize", updatePanLayout);
 playBoxRight?.addEventListener("transitionend", updatePanLayout);
 updatePanLayout();
 
 const panSlider = document.getElementById("pan");
 function updatePanFill() {
-  panSlider?.style.setProperty("--volume-fill", `${Number(panSlider.value) * 100}%`);
+  panSlider?.style.setProperty(
+    "--volume-fill",
+    `${Number(panSlider.value) * 100}%`,
+  );
 }
 panSlider?.addEventListener("input", updatePanFill);
 updatePanFill();
@@ -207,7 +273,7 @@ function bindReadoutFeedback(controls, selector) {
   function show() {
     clearTimeout(hideTimer);
     const otherLabels = document.querySelectorAll(
-      selector === ".volume-readout" ? ".channel-readout" : ".volume-readout"
+      selector === ".volume-readout" ? ".channel-readout" : ".volume-readout",
     );
     otherLabels.forEach((label) => label.classList.remove("is-visible"));
     labels.forEach((label) => label.classList.add("is-visible"));
@@ -257,17 +323,28 @@ function resetPlayShadowIdle() {
   }, 30000);
 }
 for (const event of ["pointermove", "keydown", "wheel", "input", "scroll"]) {
-  window.addEventListener(event, resetPlayShadowIdle, { passive: true, capture: true });
+  window.addEventListener(event, resetPlayShadowIdle, {
+    passive: true,
+    capture: true,
+  });
 }
-window.addEventListener("pointerdown", (event) => {
-  activeShadowPointers.add(event.pointerId);
-  resetPlayShadowIdle();
-}, { passive: true });
-for (const event of ["pointerup", "pointercancel"]) {
-  window.addEventListener(event, (event) => {
-    activeShadowPointers.delete(event.pointerId);
+window.addEventListener(
+  "pointerdown",
+  (event) => {
+    activeShadowPointers.add(event.pointerId);
     resetPlayShadowIdle();
-  }, { passive: true });
+  },
+  { passive: true },
+);
+for (const event of ["pointerup", "pointercancel"]) {
+  window.addEventListener(
+    event,
+    (event) => {
+      activeShadowPointers.delete(event.pointerId);
+      resetPlayShadowIdle();
+    },
+    { passive: true },
+  );
 }
 window.addEventListener("blur", () => {
   activeShadowPointers.clear();
@@ -283,7 +360,10 @@ function refreshSceneCaption(label) {
   const overflow = Math.max(0, text.scrollWidth - label.clientWidth);
   label.style.setProperty("--caption-start", `${label.clientWidth}px`);
   label.style.setProperty("--caption-end", `${-text.scrollWidth}px`);
-  label.style.setProperty("--caption-duration", `${(label.clientWidth + text.scrollWidth) / 25}s`);
+  label.style.setProperty(
+    "--caption-duration",
+    `${(label.clientWidth + text.scrollWidth) / 25}s`,
+  );
   label.classList.toggle("is-scrolling", overflow > 1);
 }
 
@@ -305,4 +385,6 @@ sceneCaptionLabels.forEach((label) => {
   setSceneCaption(label, label.textContent);
   sceneCaptionResizeObserver.observe(label);
 });
-document.fonts.ready.then(() => sceneCaptionLabels.forEach(refreshSceneCaption));
+document.fonts.ready.then(() =>
+  sceneCaptionLabels.forEach(refreshSceneCaption),
+);
