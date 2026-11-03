@@ -28,7 +28,7 @@ const songs = [
     cover: "covers/007-1.jpg",
     time: "May 20, 2024",
     location: "Dali City, Yunnan Province",
-    rgb: "rgb(128, 128, 96)",
+    rgb: "#687340",
     volume: "normal",
   },
   {
@@ -93,7 +93,7 @@ const songs = [
     time: "February 3, 2025",
     location: "Tbilisi, Georgia; Georgian Parliament",
     rgb: "#8C7956",
-    volume: "normal",
+    volume: "lower",
   },
   {
     audioFile: "songs/026.mp3",
