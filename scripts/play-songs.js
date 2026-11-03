@@ -7,7 +7,7 @@ const audioContext =
 const masterGain = audioContext ? audioContext.createGain() : null;
 const primarySongGain = audioContext ? audioContext.createGain() : null;
 const fadeGain = audioContext ? audioContext.createGain() : null;
-const fadeDuration = 2;
+const fadeDuration = 5;
 const primaryBalance = createTrackBalance(fadeGain);
 
 // 分别控制原始左右声道的增益；单声道输入先扩展为双声道。
