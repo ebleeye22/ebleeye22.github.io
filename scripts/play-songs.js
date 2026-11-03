@@ -114,6 +114,12 @@ function fadePlaybackTo(value, node = fadeGain, duration = fadeDuration) {
 const sceneCoverRequests = new WeakMap();
 
 async function transitionSceneCover(container, cover) {
+  if (cover === "none") {
+    // Invalidate pending loads before revealing the original CSS gradient.
+    sceneCoverRequests.delete(container);
+    container.querySelectorAll(".scene-cover").forEach((image) => image.remove());
+    return;
+  }
   const image = new Image();
   image.className = "scene-cover";
   image.alt = "";
@@ -140,6 +146,13 @@ async function transitionSceneCover(container, cover) {
   });
 }
 
+function applySceneColor(song) {
+  const color = song.cover === "none"
+    ? `hsl(${Math.floor(Math.random() * 360)}, 80%, 55%)`
+    : song.rgb;
+  document.documentElement.style.setProperty("--scene-color", color);
+}
+
 function selectSong(index, updateSource = true) {
   currentSongIndex = index;
   const song = songs[index];
@@ -148,12 +161,12 @@ function selectSong(index, updateSource = true) {
     applySongVolume(song, primarySongGain);
     audioPlayer.src = song.audioFile;
   }
-  document.documentElement.style.setProperty("--scene-color", song.rgb);
+  applySceneColor(song);
 
   const leftSection = leftPlayButton.closest("section");
-  const captions = leftSection.querySelectorAll(".scene-caption span");
-  captions[0].textContent = song.time;
-  captions[1].textContent = song.location;
+  const captions = leftSection.querySelectorAll(".scene-caption > span");
+  setSceneCaption(captions[0], song.time);
+  setSceneCaption(captions[1], song.location);
 
   const sceneImage = leftSection.querySelector(".scene-image");
   transitionSceneCover(sceneImage, song.cover);
@@ -339,10 +352,10 @@ function selectSecondarySong(forceNext = false, updateSource = true) {
     applySongVolume(song, secondarySongGain);
     secondaryAudioPlayer.src = song.audioFile;
   }
-  document.documentElement.style.setProperty("--scene-color", song.rgb);
-  const captions = secondarySection.querySelectorAll(".scene-caption span");
-  captions[0].textContent = song.time;
-  captions[1].textContent = song.location;
+  applySceneColor(song);
+  const captions = secondarySection.querySelectorAll(".scene-caption > span");
+  setSceneCaption(captions[0], song.time);
+  setSceneCaption(captions[1], song.location);
   const image = secondarySection.querySelector(".scene-image");
   transitionSceneCover(image, song.cover);
   return true;

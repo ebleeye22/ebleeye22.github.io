@@ -206,6 +206,10 @@ function bindReadoutFeedback(controls, selector) {
   let hideTimer;
   function show() {
     clearTimeout(hideTimer);
+    const otherLabels = document.querySelectorAll(
+      selector === ".volume-readout" ? ".channel-readout" : ".volume-readout"
+    );
+    otherLabels.forEach((label) => label.classList.remove("is-visible"));
     labels.forEach((label) => label.classList.add("is-visible"));
   }
   function hideLater() {
@@ -271,3 +275,34 @@ window.addEventListener("blur", () => {
 });
 window.addEventListener("focus", resetPlayShadowIdle);
 resetPlayShadowIdle();
+
+// Scroll each caption only when its text exceeds the available width.
+function refreshSceneCaption(label) {
+  const text = label.firstElementChild;
+  if (!text) return;
+  const overflow = Math.max(0, text.scrollWidth - label.clientWidth);
+  label.style.setProperty("--caption-start", `${label.clientWidth}px`);
+  label.style.setProperty("--caption-end", `${-text.scrollWidth}px`);
+  label.style.setProperty("--caption-duration", `${(label.clientWidth + text.scrollWidth) / 25}s`);
+  label.classList.toggle("is-scrolling", overflow > 1);
+}
+
+function setSceneCaption(label, value) {
+  const text = document.createElement("span");
+  text.className = "scene-caption__text";
+  text.textContent = value;
+  label.classList.remove("is-scrolling");
+  label.replaceChildren(text);
+  label.title = value;
+  refreshSceneCaption(label);
+}
+
+const sceneCaptionLabels = document.querySelectorAll(".scene-caption > span");
+const sceneCaptionResizeObserver = new ResizeObserver((entries) => {
+  entries.forEach(({ target }) => refreshSceneCaption(target));
+});
+sceneCaptionLabels.forEach((label) => {
+  setSceneCaption(label, label.textContent);
+  sceneCaptionResizeObserver.observe(label);
+});
+document.fonts.ready.then(() => sceneCaptionLabels.forEach(refreshSceneCaption));

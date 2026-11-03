@@ -160,10 +160,6 @@ section {
   transition-duration: 0.2s;
 }
 
-.volume-readout {
-  margin-top: 2em;
-}
-
 section:first-child {
   --footer-height: 65px;
   --footer-text-height: 24px;
@@ -473,9 +469,39 @@ main:has(.track-card__secondary.active) .stage-control figure {
   background: black;
 }
 
-.scene-caption span {
+.scene-caption > span {
   flex-shrink: 0;
+  width: 100%;
+  overflow: hidden;
+  text-align: center;
   white-space: nowrap;
+}
+
+.scene-caption__text {
+  display: inline-block;
+}
+
+.scene-caption > .is-scrolling {
+  text-align: left;
+}
+
+.is-scrolling > .scene-caption__text {
+  animation:
+    caption-exit calc(var(--caption-duration) / 2) linear 5s both,
+    caption-scroll var(--caption-duration) linear
+      calc(5s + var(--caption-duration) / 2) infinite;
+}
+
+@keyframes caption-exit {
+  from {
+    transform: translateX(calc((var(--caption-start) + var(--caption-end)) / 2));
+  }
+  to { transform: translateX(var(--caption-end)); }
+}
+
+@keyframes caption-scroll {
+  from { transform: translateX(var(--caption-start)); }
+  to { transform: translateX(var(--caption-end)); }
 }
 
 /* 04. 添加轨道入口 */
