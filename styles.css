@@ -13,6 +13,13 @@ textarea {
   /* 全站文字不可选中，避免点击与拖动控件时误选文字。 */
   -webkit-user-select: none;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 所有元素获得焦点时均不显示选中方框。 */
+*:focus,
+*:focus-visible {
+  outline: none;
 }
 
 @property --scene-color {
@@ -70,12 +77,20 @@ body {
   overflow: hidden;
 }
 
+/* 为 Safari 的安全区域及回弹露出的画布提供深色背景。 */
+html {
+  background: black;
+  overscroll-behavior: none;
+}
+
 body {
   display: flex;
   flex-direction: column;
   height: 100vh;
   height: 100dvh;
   margin: 0;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
   font-family:
     "Microsoft JhengHei",
     /* 英文优先 */
@@ -92,7 +107,8 @@ body {
     /* Linux / Android / 开源字体降级 */ "Noto Sans TC",
     "Source Han Sans TC",
     /* 通用无衬线 */ sans-serif;
-  background: linear-gradient(
+  background-color: black;
+  background-image: linear-gradient(
     to bottom,
     black,
     color-mix(
@@ -414,7 +430,7 @@ main:has(.track-card__secondary.active) .stage-control figure {
   /* SVG 空白区域不接收鼠标事件，内部 path 单独响应。 */
   pointer-events: none;
   z-index: 100;
-  position: fixed;
+  position: absolute;
   width: var(--square-size);
   height: var(--square-size);
   fill: black;
@@ -440,9 +456,8 @@ main:has(.track-card__secondary.active) .stage-control figure {
   pointer-events: visibleFill;
 }
 
-/* :has(path:hover) 表示：只有内部 path 被悬停时，才改变 SVG 的填充色。
-   颜色继续在 SVG 上设置，以保留原来的 fill 过渡动画。 */
-.control-figure-play:has(path:hover) {
+/* 按住内部 path 时亮起，松开后恢复；保留 SVG 的 fill 过渡动画。 */
+.control-figure-play:has(path:active) {
   fill: color-mix(in srgb, var(--scene-color) 50%, rgba(255, 255, 255, 0.5));
 }
 
@@ -457,8 +472,17 @@ main:has(.track-card__secondary.active) .stage-control figure {
 }
 
 .track-card__secondary.controls-ready
-  .control-figure-play-secondary:has(path:hover) {
+  .control-figure-play-secondary:has(path:active) {
   fill: color-mix(in srgb, var(--scene-color) 50%, rgba(255, 255, 255, 0.5));
+}
+
+/* 触屏可能在点击后保留 hover；仅鼠标设备使用悬停高亮。 */
+@media (hover: hover) and (pointer: fine) {
+  .control-figure-play:has(path:hover),
+  .track-card__secondary.controls-ready
+    .control-figure-play-secondary:has(path:hover) {
+    fill: color-mix(in srgb, var(--scene-color) 50%, rgba(255, 255, 255, 0.5));
+  }
 }
 
 .scene-caption {
@@ -721,11 +745,6 @@ footer {
   font-size: 0.8rem;
 }
 
-.control-button:focus-visible {
-  outline: 2px solid white;
-  outline-offset: 3px;
-}
-
 /* 07. 音量滑轨：定位由 script.js 的 updateVolumeLayout 更新。 */
 .volume-control {
   position: relative;
@@ -903,14 +922,19 @@ section:first-child:has(.volume-control:hover) > .volume-panel,
   }
 }
 
-/* 页脚空间不足时隐藏两侧链接 */
+/* 页脚空间不足时保留 Contact，并收紧播放控件间距。 */
 @container (max-width: 360px) {
+  .left-footer .about-link,
+  .left-footer .contact-link {
+    font-size: 0.75rem;
+  }
+
   .left-footer .footer-link:first-child {
     transform: translateX(-100vw);
   }
 
-  .left-footer .footer-link:last-child {
-    transform: translateX(100vw);
+  .left-footer .controls {
+    gap: 36px;
   }
 }
 
