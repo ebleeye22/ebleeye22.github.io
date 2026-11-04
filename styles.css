@@ -439,6 +439,7 @@ main:has(.track-card__secondary.active) .stage-control figure {
 
 .control-figure-play {
   transition:
+    opacity 1s ease,
     fill 0.25s ease,
     transform 0.08s ease;
 }
@@ -447,8 +448,19 @@ main:has(.track-card__secondary.active) .stage-control figure {
   /* 第二栏移动完成前隐藏控件；内部 path 也暂不接收鼠标事件。 */
   visibility: hidden;
   transition:
+    opacity 1s ease,
     fill 0.25s ease,
     transform 0.08s ease;
+}
+
+/* 触屏闲置时同时隐藏阴影和交互图形，触摸后由现有计时逻辑恢复。 */
+@media (hover: none), (pointer: coarse) {
+  :root.is-idle .scene-image .shadow-icon-play,
+  :root.is-idle .scene-image .control-figure-play,
+  :root.is-idle .scene-image .control-figure-play-secondary {
+    opacity: 0;
+    transition-duration: 5s, 0.25s, 0.08s;
+  }
 }
 
 .control-figure-play path {
