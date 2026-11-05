@@ -18,7 +18,7 @@ Welcome to SunshineCow's Soundscape Library, here you'll find a selection of rec
 希望这些录音能带来一段平静的时光，希望你能喜欢 ♥
 We hope these recordings bring you a moment of peace, enjoy! ♥`;
 const contactMessage = `在录音和网站开发领域我们都是业余者，如果收到改进意见我们会很高兴。
-In the fields of both audio recording and website development, We're amateur, we’d be happy to receive suggestions for improvement.
+In the fields of both audio recording and website development, We're amateur, we'd be happy to receive suggestions for improvement.
 Xiaohongshu: 1521947519
 Email: ebleeye33@qq.com`;
 let popupMessage = aboutMessage;

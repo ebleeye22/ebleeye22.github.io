@@ -667,12 +667,13 @@ footer {
   transition:
     transform 1.2s ease,
     visibility 1.2s;
-  position: absolute;
+  position: fixed;
   z-index: 101;
   left: var(--header-inset);
+  right: var(--header-inset);
   bottom: calc(
     var(--footer-height) + (var(--footer-height) - var(--footer-text-height)) /
-      2
+      2 + env(safe-area-inset-bottom, 0px)
   );
   margin: 0;
   padding: 0;
@@ -917,6 +918,17 @@ section:first-child:has(.volume-control:hover) > .volume-panel,
 
 /* 小屏幕布局 */
 @media (max-width: 720px) {
+  :root {
+    --header-inset: calc((80px - var(--header-circle-size)) / 4);
+  }
+
+  .bottom-popup {
+    font-size: 1rem;
+    line-height: 3;
+    color: white;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+  }
+
   .figure-container {
     display: none;
   }
@@ -947,7 +959,7 @@ section:first-child:has(.volume-control:hover) > .volume-panel,
 @container (max-width: 360px) {
   .left-footer .about-link,
   .left-footer .contact-link {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
   }
 
   .left-footer .footer-link:first-child {
