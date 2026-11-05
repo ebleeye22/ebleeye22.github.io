@@ -455,6 +455,15 @@ main:has(.track-card__secondary.active) .stage-control figure {
 
 /* 触屏闲置时同时隐藏阴影和交互图形，触摸后由现有计时逻辑恢复。 */
 @media (hover: none), (pointer: coarse) {
+  /* 触屏操作时保持明亮，闲置后恢复桌面端的背景亮度。 */
+  :root {
+    --scene-brightness: 70%;
+  }
+
+  :root.is-idle {
+    --scene-brightness: 30%;
+  }
+
   :root.is-idle .scene-image .shadow-icon-play,
   :root.is-idle .scene-image .control-figure-play,
   :root.is-idle .scene-image .control-figure-play-secondary {
