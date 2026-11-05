@@ -100,8 +100,18 @@ function fadePlaybackTo(value, node = fadeGain, duration = fadeDuration) {
   cancelPlaybackFade(node);
   const now = audioContext.currentTime;
   // 必须明确标记本次过渡的起点，避免沿用几分钟前的淡入结束时间。
-  node.gain.setValueAtTime(node.gain.value, now);
-  node.gain.linearRampToValueAtTime(value, now + duration);
+  const startValue = node.gain.value;
+  node.gain.setValueAtTime(startValue, now);
+  // 用平滑 S 曲线缓入缓出；分段调度保留中途取消和反向过渡的能力。
+  const steps = 128;
+  for (let step = 1; step <= steps; step++) {
+    const progress = step / steps;
+    const eased = progress * progress * (3 - 2 * progress);
+    node.gain.linearRampToValueAtTime(
+      startValue + (value - startValue) * eased,
+      now + duration * progress,
+    );
+  }
   return new Promise((resolve) => {
     const timer = setTimeout(() => {
       activeFades.delete(node);
@@ -224,6 +234,7 @@ async function changePlayback(forceNext = false) {
     if (audioPlayer.ended) audioPlayer.currentTime = 0;
     await audioPlayer.play();
     if (version !== primaryPlaybackVersion) return;
+    console.info("[左侧播放]", targetSource.split("/").pop());
     await fadePlaybackTo(1);
   } catch (error) {
     if (version === primaryPlaybackVersion) console.error("歌曲播放失败：", error);
@@ -399,6 +410,7 @@ async function changeSecondaryPlayback(forceNext = false) {
     if (secondaryAudioPlayer.ended) secondaryAudioPlayer.currentTime = 0;
     await secondaryAudioPlayer.play();
     if (version !== secondaryPlaybackVersion) return;
+    console.info("[右侧播放]", targetSource.split("/").pop());
     await fadePlaybackTo(1, secondaryFadeGain);
   } catch (error) {
     if (version === secondaryPlaybackVersion) console.error("右侧歌曲播放失败：", error);

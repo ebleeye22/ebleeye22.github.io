@@ -88,14 +88,6 @@ const songs = [
     volume: "lower",
   },
   {
-    audioFile: "songs/023.mp3",
-    cover: "covers/020-023.jpg",
-    time: "February 3, 2025",
-    location: "Tbilisi, Georgia; Georgian Parliament",
-    rgb: "#8C7956",
-    volume: "lower",
-  },
-  {
     audioFile: "songs/026.mp3",
     cover: "covers/026.jpg",
     time: "June, 2021",
